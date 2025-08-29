@@ -1,0 +1,1179 @@
+/* -------------------- Genel -------------------- */
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden; /* yatay taşmayı önler */
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;  /* center yerine stretch yap */
+  justify-content: flex-start; /* üstten başlamasını sağla */
+  min-height: 100vh;
+  background-image: url('bg.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+
+.app-header .logo img {
+  width: 160px; /* istediğin boyut */
+  height: auto;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* küçük ekranlarda taşmayı önler */
+  width: 100%;
+  padding: 10px 20px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.app-header .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.app-header .menu button {
+  font-size: 12px;
+ 
+  margin-right: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.center-title {
+  text-align: center;
+  margin-top: 30px;
+}
+
+
+/* -------------------- Başlık -------------------- */
+.app-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+
+
+.top-left-title {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: #b19cfb; /* İstediğiniz renk kodunu buraya yazın */
+}
+
+.app-subtitle {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #ffffff;
+  font-size: 16px;
+}
+/* -------------------- Auth Form -------------------- */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: center;
+   margin: 20px ;
+
+  padding-left: 20px  ; /* sol boşluk ekledik */
+
+
+  
+
+} 
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* sol hizalama */
+
+      /* sol boşluk ekledik */
+}
+
+.auth-logo img {
+  width: 300px;     /* boyutu büyüttük */
+  height: auto;
+
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 320px;
+  margin: 25px auto;
+  padding: 30px;
+  background-color: #ffffffcc;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-form input:focus {
+  border-color: #b666f3;
+  box-shadow: 0 0 8px rgba(164, 70, 236, 0.4);
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #b666f3;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-form button:hover {
+  background-color: #b666f3;
+  transform: scale(1.03);
+}
+
+/* -------------------- Form Toggle (Alt Alta Butonlar) -------------------- */
+.form-toggle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.form-toggle-wrapper button {
+  width: 200px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #b666f3;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-toggle-wrapper button:hover {
+  background-color: #b666f3;
+  transform: scale(1.05);
+}
+/* -------------------- Appoitments area -------------------- */
+
+.chat-container {
+  display: flex;
+  height: calc(100vh - 100px); /* başlık vs için */
+  gap: 20px;
+  padding: 10px;
+}
+
+/* Randevu Paneli */
+.app-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap; /* küçük ekranda alta insin */
+}
+
+.appointment-panel {
+  flex: 0 0 300px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px; 
+}
+.appointment-panel h3 {
+  margin-bottom: 10px;
+  text-align: center;
+  color: #333;
+}
+
+.appt-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.appt-item {
+  list-style: none;
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* Hata mesajı inputların altında tek satır ve kırmızı */
+.appt-error {
+  color: red;
+  font-size: 14px;
+  margin: 0; /* input altına sıkıştır */
+}
+
+
+.appt-item .appt-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.appt-item strong {
+  font-size: 15px;
+  color: #222;
+}
+
+.appt-item span {
+  font-size: 13px;
+  color: #666;
+  margin-top: 2px;
+}
+.appt-form {
+  display: flex;
+  flex-direction: column; /* Burayı column yapıyoruz */
+  gap: 8px; /* Inputlar ve buton arasında boşluk */
+}
+
+.appt-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+}
+.appt-input-title {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  border: 1px solid #ccc;
+}
+/* datetime-local için */
+input.appt-input[type="datetime-local"] {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.appt-button {
+  padding: 6px 12px;
+  background-color: #4caf50;
+  color: white;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.appt-delete-button {
+  padding: 6px 12px;
+  background-color: #f44336;
+  color: white;
+  margin-left: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.appt-delete-button:hover {
+  background-color: #d32f2f;
+}
+
+.appt-button:hover {
+  background-color: #45a049;
+}
+
+/* ChatBox yanına tam oturması için */
+.chatbox {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 768px) {
+  .appointment-panel {
+    flex: 1 1 100%;
+    order: 2; /* küçük ekranda alta geç */
+  }
+  .chatbox {
+    order: 1;
+    flex: 1 1 100%;
+  }
+}
+
+
+/* -------------------- Chat Box -------------------- */
+/* Chatbox şeffaf veya hafif opak */
+.chatbox {
+  display: flex;
+  margin-top: 20px;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  background-color: rgba(255, 255, 255, 0.9); /* Hafif şeffaf */
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 15px;
+  max-height: 70vh;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+
+
+.chat-area {
+  flex: 1; /* Mesaj alanı chatbox içinde büyüsün */
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+
+/* Webkit tarayıcılar için scroll stili */
+.chat-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-area::-webkit-scrollbar-track {
+  background: #e5e5ea;
+  border-radius: 8px;
+}
+
+.chat-area::-webkit-scrollbar-thumb {
+  background-color: #be86e9;
+  border-radius: 8px;
+  border: 2px solid #e5e5ea;
+}
+
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input:focus {
+  border-color: #b666f3;
+  box-shadow: 0 0 5px rgba(195, 69, 233, 0.5);
+}
+
+input::placeholder {
+  color: gray;
+  font-style: italic;
+}
+
+button {
+  background-color: #b666f3;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 5px 20px;
+  cursor: pointer;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+button :logout-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 5px 20px;
+  cursor: pointer;
+  align-items: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #a749ee;
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* -------------------- Mesaj Balonları -------------------- */
+.message {
+  width: fit-content;
+  max-width: 80%;
+  padding: 1px 14px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  display: block;
+}
+
+.message.user {
+  background-color: #b666f3;
+  color: #fff;
+  align-self: flex-start;
+  text-align: left;
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+
+.message.bot {
+  background-color: #e5e5ea;
+  color: #000;
+  align-self: flex-end; /* Sağ taraf */
+  text-align: left;      /* Balon içeriğini solda hizala */
+  margin-left: auto;
+  margin-right: 5px;
+  margin-bottom: 10px;      /* Sağ tarafa it */
+}
+
+/* -------------------- Typing Animasyonu -------------------- */
+.typing {
+  font-style: italic;
+  color: gray;
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.typing span {
+  width: 6px;
+  height: 6px;
+  background: #555;
+  border-radius: 50%;
+  animation: blink 1.4s infinite both;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; transform: translateY(0); }
+  20% { opacity: 1; transform: translateY(-3px); }
+  100% { opacity: 0.2; transform: translateY(0); }
+}
+
+.top-right-menu {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.top-right-menu button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #b666f3;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.top-right-menu button:hover {
+  background-color: #9d3bf4;
+}
+
+/* -------------------- Profil Box -------------------- */
+.profile-box {
+  width: 90%;
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 25px;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-box h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #007bff;
+}
+
+.profile-box p {
+  font-size: 16px;
+  color: #333;
+}
+.profile-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Ortala */
+  background-color: #4caf50;
+  color: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  font-weight: bold;
+  z-index: 1000;
+  animation: popup-show 0.5s ease-out, popup-fade 3s forwards;
+}
+
+/* Ortada görünme animasyonu */
+@keyframes popup-show {
+  0% { opacity: 0; transform: translate(-50%, -60%); }
+  100% { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+/* 3 saniye sonra yavaşça kaybolma */
+@keyframes popup-fade {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #b666f3;
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-upload-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  font-size: 14px;
+  padding: 4px 0;
+  display: none;
+}
+
+.profile-avatar:hover .avatar-upload-overlay {
+  display: block;
+}
+
+
+
+
+
+/* -------------------- Profil Container -------------------- */
+.profile-container {
+  max-width: 800px;   /* Büyük kutunun maksimum genişliği */
+  width: 95%;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #b666f3;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-title {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #5a5a5a;
+}
+
+/* -------------------- Profil Fields -------------------- */
+.profile-column {
+  display: flex;
+  flex-wrap: wrap;   /* Responsive için */
+  gap: 20px;
+  width: 100%;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 calc(50% - 20px);  /* 2 sütun */
+  min-width: 250px;            /* Mobilde tek sütuna düşsün */
+}
+
+.profile-field label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #444;
+}
+
+.profile-field input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  outline: none;
+  box-sizing: border-box;
+  transition: 0.3s ease;
+}
+
+.profile-field input:focus {
+  border-color: #b19cfb;
+  box-shadow: 0 0 6px rgba(0,123,255,0.3);
+}
+
+/* -------------------- Save Button -------------------- */
+.save-btn {
+  padding: 14px 24px;
+  font-size: 17px;
+  font-weight: bold;
+  border-radius: 10px;
+  background-color: #b19cfb;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  align-self: center;
+}
+
+.save-btn:hover {
+  background-color: rgb(173, 67, 226);
+  transform: translateY(-2px);
+}
+
+/* -------------------- Profil Mesaj -------------------- */
+.profile-message {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #007bff;
+}
+
+/*-------------------- PDF Dropzone -------------------- */
+.pdf-dropzone {
+  background-color: #eeeeee;
+  width: 300px;
+  height: 100px;
+  border: 2px dashed #888;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+.pdf-dropzone p {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
+.pdf-dropzone:hover {
+  border-color: #555;
+}
+.pdf-label {
+  background-color: #9a80f0;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-block;
+ 
+}
+
+.pdf-label:hover {
+  background-color: #9a80f0;
+  transform: scale(1.03);
+  transition: all 0.2s ease;  
+}
+
+
+
+/* -------------------- Footer -------------------- */
+/* ...existing code... */
+
+.footer {
+  background: #e8e8e8;
+  color: #636363;
+  padding: 5px 10px;
+  height: 20px;
+  font-size: 14px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center; /* dikey ortalama */
+  position: relative; /* centered absolute element için */
+  margin-top: auto;
+}
+
+/* Ortadaki metin: tam ortala */
+.footer p {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Linkleri sağa yasla */
+.footer-links {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.footer-links a {
+  /* gri arka plan */
+  color: #6d6d6d;            /* beyaz yazı */
+  padding: 6px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  
+  transition: background-color 0.15s ease, transform 0.12s ease;
+}
+
+.footer-links a:hover {
+  color: #424242;
+  transform: translateY(-1px);
+}
+
+/* Küçük ekranlarda alt alta düzenle */
+@media (max-width: 600px) {
+  .footer {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
+  .footer p {
+    position: static;
+    transform: none;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 6px;
+    white-space: normal;
+  }
+  .footer-links {
+    margin-left: 0;
+    gap: 8px;
+  }
+}
+
+/* ...existing code... */
+
+/* -------------------- Tab Header -------------------- */
+
+.tab-header {
+  display: flex;
+  justify-content: center; 
+  margin-bottom: 20px;
+  gap: 10px; 
+}
+
+.tab-header button {
+  flex: 1; 
+  padding: 10px 20px;
+  
+  background-color: #a3a3a3;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px; /* üst köşeleri yuvarlak */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.tab-header button.active-tab {
+  background-color: #9a80f0; /* yeşil */
+  color: white;
+  border-bottom: 2px solid #7149f3; /* alt çizgi ile aktifliği vurgula */
+}
+
+
+.tab-header button:hover:not(.active-tab) {
+  background-color: #e0e0e0;
+}
+
+
+/* -------------------- ask a doctor-------------------- */
+/* Container */
+/* Doktora Sor Container */
+.doktor-sor-container {
+  width: 90%;
+  
+  margin: 20px auto;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-size: 14px;
+  color: #555;
+}
+
+/* Sekmeler */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tabs button.active {
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Gönderme formu */
+.doktor-sor-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.doktor-sor-container form input,
+.doktor-sor-container form textarea {
+  font-size: 12px;
+  padding: 8px 10px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.doktor-sor-container form button.doctor-button {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.doktor-sor-container form button.doctor-button:hover {
+  background: #5b1fa6;
+}
+
+
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-box {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.popup-box p {
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.popup-box button {
+  padding: 8px 16px;
+  background: #6b46c1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* -------------------- doctor panel -------------------- */
+
+/* =======================
+   Ana Panel
+======================= */
+.doctor-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  /* header’ın altında içerik başlasın */
+  padding: 20px;
+}
+
+/* Header sabit üstte */
+.header, .doctor-panel > .DoctorHeader {
+  height: 60px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Panel body (sidebar + content) */
+.panel-body {
+  display: flex;
+  height: calc(100vh - 60px); /* header altından başlar */
+  margin-top: 60px; /* header kadar boşluk */
+}
+
+/* =======================
+   Sidebar
+======================= */
+.sidebar {
+  width: 220px;
+  background: #f8f8f8;
+  padding: 15px;
+  position: fixed; /* sabit */
+  top: 60px; /* header altından başlar */
+  left: 0;
+  bottom: 0;
+  overflow-y: auto; /* çok kategori olursa scroll */
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #565656;
+}
+
+.sidebar ul {
+  
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 10px;
+  
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  border-radius: 5px;
+  transition: background 0.2s;
+  margin-bottom: 5px;
+}
+
+.sidebar li:hover {
+  background: #eaeaea;
+}
+
+.sidebar li.active {
+  background: #7c3aed;
+  color: white;
+}
+
+/* =======================
+   Sağ taraf içerik
+======================= */
+.content {
+  margin-left: 220px; /* sidebar genişliği kadar boşluk */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px 20px;
+  box-sizing: border-box;
+}
+
+/* Başlık */
+.content h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+/* =======================
+   Mesajlar
+======================= */
+.messages-container {
+  flex: 1; /* kalan tüm alanı kaplar */
+  max-height: 100vh;
+  overflow-y: scroll;
+  background-color: rgba(250, 250, 250, 0.3);
+  border-radius: 5px;
+  padding: 10px 0;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.20);
+}
+.messages-container-panel {
+   flex: 1; /* kalan tüm alanı kaplar */
+ 
+  overflow-y: auto;
+  background-color: rgba(250, 250, 250, 0.3);
+  border-radius: 5px;
+  padding: 10px 0;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.20);
+}
+
+
+/* Soru Kartları */
+.question-card {
+
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px; /* içerik ile kart kenarı arası */
+  margin: 5px 10px; /* üst-alt 5px, sağ-sol 10px boşluk */
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+
+.question-card p {
+  margin: 5px 0;
+}
+
+.question-card textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 10px;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  resize: vertical;
+}
+
+.question-card button {
+  margin-top: 5px;
+  font-size: 12px;
+  padding: 6px 10px;
+  background-color: #7e57c2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.question-card button:hover {
+  background-color: #6a1b9a;
+}
+
+
+/* -------------------- doctor panel header -------------------- */
+
+.doctor-header {
+  position: fixed;      /* sayfanın üstüne sabitlenir */
+  top: 0;               /* yukarıdan sıfır */
+  left: 0;              /* soldan sıfır */
+  width: 100%;          /* boydan boya */
+  height: 60px;         /* header yüksekliği */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;      /* iç boşluk sağ/sol */
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;        /* her şeyin üstünde */
+}
+
+
+
+.doctor-logo {
+  height: 40px;
+  width: auto;
+}
+
+.doctor-logout {
+  box-sizing: border-box;
+  background-color: #4a148c;
+  color: white;
+  border: none;
+  margin-right: 40px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.doctor-logout:hover {
+  background-color: #6a1b9a;
+}
+.doctor-logout:active {
+  transform: scale(0.95);
+}
+
+
+
