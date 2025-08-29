@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# 🤖 Basic Gemini Chatbot
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple AI-powered chatbot application built with **React (frontend)** and **Flask (backend)**.  
+This project demonstrates user authentication (login/register), chat functionality, and profile management.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📌 Features
+- 🔐 **User Authentication** (Register & Login)
+- 👤 **Profile Page**
+- 💬 **Chat Interface** with AI responses
+- 🎨 Clean and responsive **UI/UX**
+- ⚡ Fast integration between **React frontend** and **Flask backend**
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🛠️ Tech Stack
+### Frontend
+- React
+- React Router
+- Axios
+- CSS / Tailwind (depending on your setup)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Backend
+- Python (Flask)
+- Flask-JWT for authentication
+- SQLite / PostgreSQL (configurable)
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Getting Started
 
-### `npm run build`
+### 1. Clone the repository
+```bash
+git clone https://github.com/Hakanertrk/Basic-Gemini-Chatbot.git
+cd Basic-Gemini-Chatbot
+2. Backend Setup (Flask)
+bash
+Kodu kopyala
+cd backend
+python -m venv venv
+source venv/bin/activate   # (Mac/Linux)
+venv\Scripts\activate      # (Windows)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+pip install -r requirements.txt
+flask run
+Backend will start on: http://127.0.0.1:5000
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Frontend Setup (React)
+bash
+Kodu kopyala
+cd frontend
+npm install
+npm start
+Frontend will start on: http://localhost:3000
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+📂 Project Structure
+bash
+Kodu kopyala
+Basic-Gemini-Chatbot/
+│
+├── backend/         # Flask backend
+│   ├── app.py
+│   ├── models.py
+│   └── requirements.txt
+│
+├── frontend/        # React frontend
+│   ├── src/
+│   │   ├── App.js
+│   │   ├── ChatBox.js
+│   │   ├── Login.js
+│   │   ├── Register.js
+│   │   └── Profile.js
+│   └── package.json
+│
+└── README.md
+📸 Screenshots
+(Add screenshots of your app here for a professional look)
 
-### `npm run eject`
+🤝 Contributing
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+📄 License
