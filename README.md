@@ -1,4 +1,4 @@
-# 🤖 Basic Gemini Chatbot
+# 🤖 Health Based Gemini Chatbot/ CHATDOC.AI
 
 A simple AI-powered chatbot application built with **React (frontend)** and **Flask (backend)**.  
 This project demonstrates user authentication (login/register), chat functionality, and profile management.
