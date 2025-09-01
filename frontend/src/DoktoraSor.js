@@ -9,6 +9,8 @@ export default function DoktoraSor({ token }) {
   const [newMessage, setNewMessage] = useState("");
   const [subject, setSubject] = useState(""); // Yeni soru başlığı
   const [initialMessage, setInitialMessage] = useState(""); // Yeni soru mesajı
+  const [doctors, setDoctors] = useState([]); // ✅ Doktor listesi
+  const [selectedDoctor, setSelectedDoctor] = useState(""); // ✅ Seçilen doktor
   const messagesEndRef = useRef(null); // Scroll için ref
 
   // Kullanıcının tüm sorularını çek
@@ -23,8 +25,21 @@ export default function DoktoraSor({ token }) {
     }
   }, [token]);
 
+useEffect(() => {
+  const fetchDoctors = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:5000/doctors");
+      setDoctors(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchDoctors();
+}, []);
+
+  
   // Mesajları çek
-// 1️⃣ fetchMessages içinden ve messages useEffect’inden scrollToBottom’u kaldır
+// fetchMessages içinden ve messages useEffect’inden scrollToBottom’u kaldır
 const fetchMessages = useCallback(
   async (qId = selectedQuestion?.id) => {
     if (!qId) return;
@@ -43,28 +58,32 @@ const fetchMessages = useCallback(
 );
 
   // Yeni soru oluştur
-  const createQuestion = async () => {
-    if (!subject.trim() || !initialMessage.trim()) return;
+const createQuestion = async () => {
+    if (!subject.trim() || !initialMessage.trim() || !selectedDoctor) return;
     try {
       const res = await axios.post(
         "http://127.0.0.1:5000/doctor-questions",
-        { subject, message: initialMessage },
+        {
+          subject,
+          message: initialMessage,
+          doctor_id: selectedDoctor, // ✅ Doktor ID ekleniyor
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchQuestions();
       setSubject("");
       setInitialMessage("");
+      setSelectedDoctor("");
       openChat({ id: res.data.question_id, subject });
     } catch (err) {
       console.error("Soru oluşturulamadı:", err);
     }
   };
-  
 
 
 
   // Mesaj gönder
-// 2️⃣ sendMessage sonrası scroll yap
+//  sendMessage sonrası scroll yap
 const sendMessage = async () => {
   if (!newMessage.trim() || !selectedQuestion) return;
   try {
@@ -87,7 +106,7 @@ useEffect(() => {
     scrollToBottom();
   }
   setPrevMessagesLength(messages.length);
-}, [messages, prevMessagesLength]); // ✅
+}, [messages, prevMessagesLength]); 
 
 const scrollToBottom = () => {
   if (messagesEndRef.current) {
@@ -136,22 +155,41 @@ const scrollToBottom = () => {
           placeholder="Sorunuzu yazın..."
           rows="3"
         />
+        <select
+          value={selectedDoctor}
+          onChange={(e) => setSelectedDoctor(e.target.value)}
+        >
+          <option value="">Bir doktor seçin</option>
+          {doctors.map((d) => (
+            <option key={d.id} value={d.id}>{d.name}</option>
+          ))}
+        </select>
         <button onClick={createQuestion}>Soruyu Gönder</button>
       </div>
 
       {/* Soru başlıkları listesi */}
       <h3>Mevcut Sorular</h3>
-      <div className="question-list">
-        {questions.map((q) => (
-          <div
-            key={q.id}
-            className={`question-item ${selectedQuestion?.id === q.id ? "active" : ""}`}
-            onClick={() => openChat(q)}
-          >
-            {q.subject} ({q.status})
-          </div>
-        ))}
-      </div>
+        <div className="question-list">
+          {questions.map((q) => {
+            const statusText =
+              q.status.toLowerCase() === "pending"
+                ? "Mesaj Bekleniyor"
+                : q.status.toLowerCase() === "answered"
+                ? "Cevaplandı"
+                : q.status;
+
+            return (
+              <div
+                key={q.id}
+                className={`question-item ${selectedQuestion?.id === q.id ? "active" : ""}`}
+                onClick={() => openChat(q)}
+              >
+                {q.subject} ({statusText})
+              </div>
+            );
+          })}
+        </div>
+
 
       {/* Mesaj kutucuğu */}
       {selectedQuestion && (

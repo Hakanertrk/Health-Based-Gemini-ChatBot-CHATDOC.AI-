@@ -559,7 +559,7 @@ def doctor_questions():
     cursor = conn.cursor()
 
     if request.method == "POST":
-        # Mevcut create_doctor_question kodunu buraya taşı
+        # Kullanıcı ID'si
         user_id = payload.get("user_id")
         username = payload.get("username")
         if not user_id:
@@ -572,37 +572,50 @@ def doctor_questions():
         data = request.json
         subject = data.get("subject")
         message = data.get("message")
-        if not subject or not message:
-            return jsonify({"error": "Başlık ve mesaj zorunludur"}), 400
+        doctor_id = data.get("doctor_id")  # frontend’den gelen doktor ID
 
+        if not subject or not message or not doctor_id:
+            return jsonify({"error": "Başlık, mesaj ve doktor seçimi zorunludur"}), 400
+
+        # Soru oluştur
         cursor.execute(
-            "INSERT INTO doctor_questions (user_id, subject, status, created_at) VALUES (%s, %s, %s, NOW()) RETURNING id",
-            (user_id, subject, "pending")
+            """
+            INSERT INTO doctor_questions (user_id, doctor_id, subject, status, created_at)
+            VALUES (%s, %s, %s, %s, NOW())
+            RETURNING id
+            """,
+            (user_id, doctor_id, subject, "pending")
         )
         question_id = cursor.fetchone()[0]
 
+        # İlk mesajı ekle
         cursor.execute(
             "INSERT INTO doctor_messages (question_id, sender, message, created_at) VALUES (%s, %s, %s, NOW())",
             (question_id, "user", message)
         )
+
         conn.commit()
         return jsonify({"message": "Soru oluşturuldu", "question_id": question_id}), 201
 
     elif request.method == "GET":
-        # Sadece doktor rolü kontrolü
+        # Sadece doktor paneli
         if payload.get("role") != "doctor":
             return jsonify({"error": "Yetkisiz"}), 403
-        
-        # Soruları getir
+
+        doctor_id = payload.get("user_id")  # Token’dan kendi user_id’si
+
+        # Sadece kendine atanmış soruları getir
         cursor.execute("""
-            SELECT q.id, q.subject, m.message, u.username AS user_name, u.gender, q.status, 
-                MAX(CASE WHEN m.sender='doctor' THEN m.message END) AS doctor_reply
+            SELECT q.id, q.subject, m.message, u.username AS user_name, u.gender, q.status,
+                   MAX(CASE WHEN m.sender='doctor' THEN m.message END) AS doctor_reply
             FROM doctor_questions q
             JOIN users u ON q.user_id = u.id
             JOIN doctor_messages m ON m.question_id = q.id
+            WHERE q.doctor_id = %s
             GROUP BY q.id, q.subject, m.message, u.username, u.gender, q.status
             ORDER BY q.created_at DESC
-        """)
+        """, (doctor_id,))
+
         questions = cursor.fetchall()
         result = [
             {
@@ -616,6 +629,16 @@ def doctor_questions():
             } for q in questions
         ]
         return jsonify(result)
+
+
+@app.route("/doctors", methods=["GET"])
+def get_doctors():
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, firstname, lastname FROM users WHERE role='doctor'")
+    doctors = cursor.fetchall()
+    result = [{"id": d[0], "name": f"{d[1]}"} for d in doctors]
+    return jsonify(result)
+
 
 # -----------------------
 # Doktor veya kullanıcı cevabı

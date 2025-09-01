@@ -45,7 +45,7 @@
 
 .panel-body {
   display: flex;
-  height: calc(100vh - 60px); /* header varsa */
+  height: calc(100vh - 90px); /* header varsa */
   
 
   box-sizing: border-box;
@@ -120,6 +120,13 @@
   flex-direction: column;
   height: 100%;
 }
+.content p {
+  color: #3e3e3e;
+  display: flex;
+  margin: auto;
+}
+
+
 
 .chat-container-panel {
   flex: 1;
