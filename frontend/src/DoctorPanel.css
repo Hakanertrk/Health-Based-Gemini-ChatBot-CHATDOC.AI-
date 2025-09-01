@@ -1,0 +1,75 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* veya ihtiyacına göre */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  overflow: hidden; /* dış container scroll olmasın */
+}
+
+.messages-wrapper {
+  flex: 1;
+  overflow-y: auto; /* sadece burası scrollable */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.message.user {
+  background-color: #cb95f4;
+  align-self: flex-start; /* solda */
+}
+
+.message.doctor {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  align-self: flex-end; /* sağda */
+}
+
+.message small {
+  display: block;
+  font-size: 10px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+
+  background: #f9f9f9;
+  position: sticky; /* alt kısımda sabit */
+  bottom: 0;
+  z-index: 1;
+}
+
+.message-input textarea {
+  flex: 1;
+  resize: none;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.message-input button {
+  padding: 4px 16px;
+  border: none;
+  background-color: #a749ee;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.message-input button:hover {
+  background-color: #741d80;
+}

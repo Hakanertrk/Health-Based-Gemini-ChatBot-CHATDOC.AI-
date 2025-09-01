@@ -1,0 +1,134 @@
+.doktor-sor-container {
+  max-width: 90%;
+  margin: 50px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.new-question input,
+.new-question textarea {
+    font-size: 12px;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.new-question button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #bf4df3;
+  color: white;
+  cursor: pointer;
+}
+
+.question-list {
+  margin: 20px 0;
+}
+
+.question-item {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  margin-bottom: 5px;
+  transition: background-color 0.2s;
+}
+
+.question-item.active {
+  background-color: #d0e7ff;
+}
+
+.chat-box {
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+.chat-box h4 {
+  text-align: center;
+  background-color: #f4f4f4;
+  color: rgb(103, 103, 103);
+  margin: 0;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+ 
+}
+
+.messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #fafafa;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message.user {
+  align-self: flex-start;
+  background-color: #db7ef4;
+  border-bottom-left-radius: 0;
+}
+
+.message.doctor {
+  align-self: flex-end;
+  background-color: #d0e7ff;
+  border-bottom-right-radius: 0;
+}
+
+.message small {
+  display: block;
+  font-size: 10px;
+  color: #555;
+  margin-top: 5px;
+}
+
+.message-input {
+  display: flex;
+  padding: 10px;
+  
+  background-color: #f9f9f9;
+}
+
+.message-input textarea {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  resize: none;
+  margin-right: 10px;
+}
+
+.message-input button {
+  padding: 0 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ba48d9;
+  color: white;
+  cursor: pointer;
+}
+
+/* Scrollbar stilini güzelleştirmek için */
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}

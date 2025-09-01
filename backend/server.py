@@ -45,6 +45,29 @@ waiting_for_bot = {}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+# -----------------------
+# Yardımcı fonksiyon: Token doğrulama
+# -----------------------
+def verify_token(auth_header):
+    """
+    auth_header: request.headers.get("Authorization")
+    Dönüş: (payload, error_response, status)
+    """
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None, jsonify({"error": "Token eksik"}), 401
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        return payload, None, None
+    except ExpiredSignatureError:
+        return None, jsonify({"error": "Token süresi dolmuş"}), 401
+    except InvalidTokenError:
+        return None, jsonify({"error": "Geçersiz token"}), 401
+    except Exception as e:
+        print("JWT Hatası:", e)
+        return None, jsonify({"error": "Token doğrulama hatası"}), 401
 # -----------------------
 # Danger kelimeler
 # -----------------------
@@ -130,14 +153,14 @@ Rapor metni:
         response.raise_for_status()
         ai_reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
-        ai_reply = "⚠️ AI analizi yapılamadı."
+        ai_reply = " AI analizi yapılamadı."
         print("PDF analiz hatası:", e)
 
     bot_reply = genel_ozet
     if referans_disi:
-        bot_reply += "\n\n⚠️ Referans dışı değerler bulundu:\n- " + "\n- ".join(referans_disi)
+        bot_reply += "\n\n Referans dışı değerler bulundu:\n- " + "\n- ".join(referans_disi)
     else:
-        bot_reply += "\n✅ Önemli değerler referans aralıklarında."
+        bot_reply += "\n Önemli değerler referans aralıklarında."
     bot_reply += f"\n\nAI Önerisi:\n{ai_reply}"
 
     chat_history.setdefault(username, []).append({"sender": "user", "text": f"[PDF dosyası yüklendi] {pdf_file.filename}"})
@@ -206,7 +229,7 @@ def login():
     if not username or not password:
         return jsonify({"error": "Kullanıcı adı ve şifre boş olamaz"}), 400
 
-    # ✅ role bilgisini de çekiyoruz
+    #  role bilgisini de çekiyoruz
     cursor.execute("SELECT password_hash, role FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
     if not row or not check_password_hash(row[0], password):
@@ -216,14 +239,14 @@ def login():
 
     token = jwt.encode({
         "username": username,
-        "role": role,  # ✅ token içine de role ekleyebilirsin (opsiyonel)
+        "role": role,  # token içine de role ekleyebilirsin (opsiyonel)
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
     }, JWT_SECRET, algorithm="HS256")
 
     chat_history.setdefault(username, [])
     waiting_for_bot[username] = False
 
-    # ✅ role bilgisini de frontend'e gönderiyoruz
+    # role bilgisini de frontend'e gönderiyoruz
     return jsonify({"token": token, "role": role})
 
 
@@ -516,157 +539,162 @@ def history():
 # -----------------------
 # Doktora soru sorma (kullanıcı yeni soru)
 # -----------------------
-# Kullanıcı soru gönderimi
-@app.route("/doctor-question", methods=["POST"])
-def doctor_question():
-    auth_header = request.headers.get("Authorization")
-    if not auth_header:
-        return jsonify({"error": "Token gerekli"}), 401
 
-    token = auth_header.split(" ")[1]
-    try:
-        data_token = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        username = data_token.get("username")
-        if not username:
-            return jsonify({"error": "Geçersiz token"}), 401
-    except Exception as e:
-        print("JWT Hatası:", e)
-        return jsonify({"error": "Geçersiz token"}), 401
+@app.route("/doctor-questions", methods=["GET", "POST"])
+def doctor_questions():
+    payload, error_response, status = verify_token(request.headers.get("Authorization"))
+    if error_response:
+        return error_response, status
 
-    # Kullanıcı id'sini al
-    cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
-    row = cursor.fetchone()
-    if not row:
-        return jsonify({"error": "Kullanıcı bulunamadı"}), 404
-    user_id = row[0]
+    cursor = conn.cursor()
+
+    if request.method == "POST":
+        # Mevcut create_doctor_question kodunu buraya taşı
+        user_id = payload.get("user_id")
+        username = payload.get("username")
+        if not user_id:
+            cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
+            row = cursor.fetchone()
+            if not row:
+                return jsonify({"error": "Kullanıcı bulunamadı"}), 404
+            user_id = row[0]
+
+        data = request.json
+        subject = data.get("subject")
+        message = data.get("message")
+        if not subject or not message:
+            return jsonify({"error": "Başlık ve mesaj zorunludur"}), 400
+
+        cursor.execute(
+            "INSERT INTO doctor_questions (user_id, subject, status, created_at) VALUES (%s, %s, %s, NOW()) RETURNING id",
+            (user_id, subject, "pending")
+        )
+        question_id = cursor.fetchone()[0]
+
+        cursor.execute(
+            "INSERT INTO doctor_messages (question_id, sender, message, created_at) VALUES (%s, %s, %s, NOW())",
+            (question_id, "user", message)
+        )
+        conn.commit()
+        return jsonify({"message": "Soru oluşturuldu", "question_id": question_id}), 201
+
+    elif request.method == "GET":
+        # Sadece doktor rolü kontrolü
+        if payload.get("role") != "doctor":
+            return jsonify({"error": "Yetkisiz"}), 403
+        
+        # Soruları getir
+        cursor.execute("""
+            SELECT q.id, q.subject, m.message, u.username AS user_name, q.status, 
+                   MAX(CASE WHEN m.sender='doctor' THEN m.message END) AS doctor_reply
+            FROM doctor_questions q
+            JOIN users u ON q.user_id = u.id
+            JOIN doctor_messages m ON m.question_id = q.id
+            GROUP BY q.id, q.subject, m.message, u.username, q.status
+            ORDER BY q.created_at DESC
+        """)
+        questions = cursor.fetchall()
+        result = [
+            {
+                "id": q[0],
+                "subject": q[1],
+                "message": q[2],
+                "user_name": q[3],
+                "status": q[4],
+                "doctor_reply": q[5]
+            } for q in questions
+        ]
+        return jsonify(result)
+
+# -----------------------
+# Doktor veya kullanıcı cevabı
+# -----------------------
+@app.route("/doctor-question/<int:question_id>/messages", methods=["POST"])
+def add_message(question_id):
+    payload, error_response, status = verify_token(request.headers.get("Authorization"))
+    if error_response:
+        return error_response, status
+
+    user_id = payload.get("user_id")
+    role = payload.get("role", "user")
 
     data = request.json
-    subject = data.get("subject")
     message = data.get("message")
+    if not message:
+        return jsonify({"error": "Mesaj boş olamaz"}), 400
 
-    if not subject or not message:
-        return jsonify({"error": "Başlık ve mesaj boş olamaz"}), 400
+    sender = "doctor" if role == "doctor" else "user"
 
     cursor.execute(
-        """
-        INSERT INTO doctor_questions (user_id, subject, message, status, created_at)
-        VALUES (%s, %s, %s, %s, NOW())
-        """,
-        (user_id, subject, message, "pending")
+        "INSERT INTO doctor_messages (question_id, sender, message, created_at) VALUES (%s, %s, %s, NOW())",
+        (question_id, sender, message)
     )
+
+    # status güncelleme
+    status_update = "answered" if sender == "doctor" else "pending"
+    cursor.execute(
+        "UPDATE doctor_questions SET status=%s WHERE id=%s",
+        (status_update, question_id)
+    )
+
     conn.commit()
+    return jsonify({"message": "Mesaj eklendi"}), 201
 
-    return jsonify({"message": "Soru başarıyla gönderildi"})
-
-
-
-# Doktor cevabı veya kullanıcı tekrar cevabı
-@app.route("/doctor-question/<int:question_id>/reply", methods=["POST"])
-def reply_doctor_question(question_id):
+# -----------------------
+# Doktor paneli: tüm sorular
+# -----------------------
+@app.route("/doctor-question/<int:question_id>/messages", methods=["GET"])
+def get_messages(question_id):
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return jsonify({"error": "Token gerekli"}), 401
 
     token = auth_header.split(" ")[1]
     try:
-        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        role = decoded.get("role")   # 👈 doktor mu kullanıcı mı?
+        jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     except Exception as e:
         print("JWT Hatası:", e)
         return jsonify({"error": "Geçersiz token"}), 401
 
-    data = request.json
-    reply = data.get("reply")
-
-    if not reply:
-        return jsonify({"error": "Cevap boş olamaz"}), 400
-
-    if role == "doctor":
-        cursor.execute(
-            "UPDATE doctor_questions SET doctor_reply=%s, status='answered' WHERE id=%s",
-            (reply, question_id)
-        )
-    else:  # user tekrar cevaplıyor
-        cursor.execute(
-            "UPDATE doctor_questions SET user_reply=%s, status='pending' WHERE id=%s",
-            (reply, question_id)
-        )
-
-
-    conn.commit()
-    return jsonify({"message": "Cevap kaydedildi"})
-
-
-
-
-
-
-# -----------------------
-# Doktor paneli - tüm soruları listele
-# -----------------------
-# Tüm soruları çek
-@app.route("/doctor-questions", methods=["GET"])
-def get_doctor_questions():
-    auth_header = request.headers.get("Authorization", "")
-    if not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Token gerekli"}), 401
-
-    token = auth_header.split(" ")[1]
-    try:
-        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        role = decoded.get("role")
-    except Exception:
-        return jsonify({"error": "Geçersiz token"}), 401
-
-    if role != "doctor":
-        return jsonify({"error": "Yetkisiz erişim"}), 403
-
+    cursor = conn.cursor()
     cursor.execute(
-        """
-        SELECT dq.id, u.firstname, u.lastname, dq.subject, dq.message, dq.doctor_reply, dq.user_reply, dq.status, dq.created_at
-        FROM doctor_questions dq
-        JOIN users u ON dq.user_id = u.id
-        ORDER BY dq.created_at DESC
-        """
+        "SELECT id, sender, message, created_at FROM doctor_messages WHERE question_id=%s ORDER BY created_at ASC",
+        (question_id,)
     )
-    questions = cursor.fetchall()
-    result = []
-    for q in questions:
-        result.append({
-            "id": q[0],
-            "user_name": f"{q[1]} {q[2]}",
-            "subject": q[3],
-            "message": q[4],
-            "doctor_reply": q[5],
-            "user_reply": q[6],
-            "status": q[7],
-            "created_at": q[8].strftime("%Y-%m-%d %H:%M:%S")
-        })
+    messages = cursor.fetchall()
+
+    result = [
+        {
+            "id": m[0],
+            "sender": m[1],
+            "message": m[2],
+            "created_at": m[3].isoformat()
+        }
+        for m in messages
+    ]
+
     return jsonify(result)
 
 
-
+# -----------------------
+# Kullanıcı paneli: kendi soruları
+# -----------------------
 @app.route("/my-questions", methods=["GET"])
 def get_my_questions():
-    auth_header = request.headers.get("Authorization", "")
-    if not auth_header.startswith("Bearer "):
-        return jsonify({"error": "Token gerekli"}), 401
+    payload, error_response, status = verify_token(request.headers.get("Authorization"))
+    if error_response:
+        return error_response, status
 
-    token = auth_header.split(" ")[1]
-    try:
-        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        username = decoded.get("username")
-    except Exception:
-        return jsonify({"error": "Geçersiz token"}), 401
+    username = payload.get("username")
+    if not username:
+        return jsonify({"error": "Token içinde username yok"}), 401
 
-    # user_id bul
     cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Kullanıcı bulunamadı"}), 404
     user_id = row[0]
 
-    # sadece kendi sorularını getir
     cursor.execute(
         """
         SELECT id, subject, message, doctor_reply, user_reply, status, created_at
@@ -677,6 +705,7 @@ def get_my_questions():
         (user_id,)
     )
     questions = cursor.fetchall()
+
     result = []
     for q in questions:
         result.append({
@@ -689,8 +718,6 @@ def get_my_questions():
             "created_at": q[6].strftime("%Y-%m-%d %H:%M:%S")
         })
     return jsonify(result)
-
-
 
 
 

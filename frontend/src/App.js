@@ -10,6 +10,7 @@ import Header from "./Header";
 import HomePage from "./HomePage";
 import "./App.css";
 import axios from "axios";
+import DoktoraSor from "./DoktoraSor";
 
 function ChatPage({ token }) {
   const [appointments, setAppointments] = useState([]);
@@ -122,10 +123,9 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const navigate = useNavigate();
   const location = useLocation();
-  const [popupMessage, setPopupMessage] = useState("");
-
-  const [activeTab, setActiveTab] = useState("gonderilen"); 
-  const [questions, setQuestions] = useState([]);
+  
+  
+  const [, setQuestions] = useState([]);
   
   const logout = () => {
     localStorage.removeItem("token");
@@ -178,104 +178,12 @@ useEffect(() => {
           element={token ? <Profile token={token} /> : <Navigate to="/login" />}
         />
         <Route path="/chat" element={token ? <ChatPage token={token} /> : <Navigate to="/login" />} />
-        <Route
-          path="/doktora-sor"
-          element={
-            token ? (
-              <div className="doktor-sor-container">
-                <h2>Doktora Sor</h2>
+        <Route path="/doktora-sor" element={<DoktoraSor token={token} />} />
 
-                <div className="tabs">
-                  <button
-                    className={activeTab === "gonderilen" ? "active" : ""}
-                    onClick={() => setActiveTab("gonderilen")}
-                  >
-                    Gönderilen Sorular
-                  </button>
-                  <button
-                    className={activeTab === "yanitlanan" ? "active" : ""}
-                    onClick={() => setActiveTab("yanitlanan")}
-                  >
-                    Yanıtlanan Sorular
-                  </button>
-                </div>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const subject = e.target.subject.value.trim();
-                    const message = e.target.message.value.trim();
-                    if (!subject || !message) return;
-
-                    try {
-                      await axios.post(
-                        "http://127.0.0.1:5000/doctor-question",
-                        { subject, message },
-                        { headers: { Authorization: `Bearer ${token}` } }
-                      );
-                      setPopupMessage("✅ Soru başarıyla gönderildi!");
-                      e.target.reset();
-                      fetchUserQuestions(); // soruları tekrar çek
-                    } catch (err) {
-                      console.error(err.response?.data || err.message);
-                      alert("Soru gönderilirken bir hata oluştu.");
-                    }
-                  }}
-                >
-                  <input type="text" name="subject" placeholder="Sorunun başlığı" required />
-                  <textarea name="message" placeholder="Sorunuzu yazın..." rows="5" required />
-                  <button type="submit" className="doctor-button">Gönder</button>
-                </form>
-                <div className="messages-container">
-                  {activeTab === "gonderilen" &&
-                    questions
-                      .filter(q => q.status === "pending")
-                      .map(q => (
-                        <div key={q.id} className="question-card">
-                          <p><strong>{q.subject}</strong></p>
-                          <p>{q.message}</p>
-                        </div>
-                      ))
-                  }
-
-                  {activeTab === "yanitlanan" &&
-                    questions
-                      .filter(q => q.status === "answered" || q.user_reply)
-                      .map(q => (
-                        <div key={q.id} className="question-card">
-                          <p><strong>{q.subject}</strong></p>
-                          <p>{q.message}</p>
-
-                         
-
-                     
-
-                          {q.doctor_reply && (
-                            <p className="doctor-reply"><strong>Doktor cevabı:</strong> {q.doctor_reply}</p>
-                          )}
-                        </div>
-                      ))
-                  }
-
-
-                </div>
-              </div>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
        
       </Routes>
 
-      {popupMessage && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <p>{popupMessage}</p>
-            <button onClick={() => setPopupMessage("")}>Kapat</button>
-          </div>
-        </div>
-      )}
+      
 
       <Footer />
     </div>

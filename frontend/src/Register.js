@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ yönlendirme için
+import { useNavigate } from "react-router-dom"; 
 import axios from "axios";
-import "./App.css"; // CSS dosyasını import et
+import "./App.css"; 
 
 export default function Register() {
 
@@ -10,12 +10,12 @@ export default function Register() {
   const [lastname, setLastname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [specialization, setSpecialization] = useState(""); // Doktor için ekstra
-  const [license_number, setLicense_number] = useState(""); // Doktor için ekstra
+  const [specialization, setSpecialization] = useState(""); 
+  const [license_number, setLicense_number] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const navigate = useNavigate(); // ✅ yönlendirme hook
+  const navigate = useNavigate(); //  yönlendirme hook
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -132,7 +132,7 @@ export default function Register() {
 
         <button type="submit">Kayıt Ol</button>
 
-        {/* ✅ Giriş ekranına yönlendirme */}
+        {/* Giriş ekranına yönlendirme */}
         <div style={{ marginTop: "10px" }}>
           <p>Zaten hesabın var mı?</p>
           <button type="button" onClick={() => navigate("/login")}>

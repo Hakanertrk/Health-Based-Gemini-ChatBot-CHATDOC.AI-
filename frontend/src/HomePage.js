@@ -42,6 +42,10 @@ export default function HomePage({ token }) {
             <p>Sorularınıza anında cevap alın ve zaman kaybetmeyin.</p>
           </div>
           <div className="feature-card">
+            <h3>Uzman Bilgisi</h3>
+            <p>Sorularınızı gerçek doktorlara sorun.</p>
+          </div>
+          <div className="feature-card">
             <h3>Kolay Kullanım</h3>
             <p>Basit ve anlaşılır arayüz ile her yaş için uygun.</p>
           </div>

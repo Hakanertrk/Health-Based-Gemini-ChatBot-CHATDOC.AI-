@@ -27,10 +27,10 @@ export default function Login({ setToken }) {
       const { token, role } = res.data;
 
       localStorage.setItem("token", token);
-      localStorage.setItem("role", role); // ✅ role bilgisini de kaydediyoruz
+      localStorage.setItem("role", role); // role bilgisini de kaydediyoruz
       setToken(token);
 
-      // ✅ role göre yönlendirme
+      // role göre yönlendirme
       if (role === "doctor") {
         navigate("/doctor-panel");
       } else {  

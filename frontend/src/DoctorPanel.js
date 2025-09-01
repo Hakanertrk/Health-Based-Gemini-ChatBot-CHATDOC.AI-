@@ -1,145 +1,165 @@
-import React, { useState, useEffect, useRef } from "react"; 
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
-import DoctorHeader from "./DoctorHeader"; 
+import DoctorHeader from "./DoctorHeader";
+import "./DoctorPanel.css";
 
 export default function DoctorPanel({ token }) {
   const [questions, setQuestions] = useState([]);
-  const [replyMap, setReplyMap] = useState({});
-  const [activeTab, setActiveTab] = useState("gelen"); 
-  const messagesEndRef = useRef(null); 
+  const [activeQuestionId, setActiveQuestionId] = useState(null);
+  const [messages, setMessages] = useState({});
+  const [newMessage, setNewMessage] = useState({});
+  const messagesEndRef = useRef({});
 
-  const fetchQuestions = async () => {
-    try {
-      const res = await axios.get("http://127.0.0.1:5000/doctor-questions", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setQuestions(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleReplyChange = (id, value) => {
-    setReplyMap(prev => ({ ...prev, [id]: value }));
-  };
-
-  const sendReply = async (id) => {
-    if (!replyMap[id]) return;
-    try {
-      await axios.post(
-        `http://127.0.0.1:5000/doctor-question/${id}/reply`,
-        { reply: replyMap[id] },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchQuestions();
-      setReplyMap(prev => ({ ...prev, [id]: "" }));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const res = await axios.get("http://127.0.0.1:5000/doctor-questions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setQuestions(res.data);
-      } catch (err) {
-        console.error(err);
+const fetchQuestions = useCallback(async () => {
+  try {
+    const res = await axios.get("http://127.0.0.1:5000/doctor-questions", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    // ID bazlı uniq
+    const uniqueQuestions = [];
+    const ids = new Set();
+    res.data.forEach(q => {
+      if (!ids.has(q.id)) {
+        ids.add(q.id);
+        uniqueQuestions.push(q);
       }
-    };
-    fetchQuestions();
-  }, [token]);
+    });
+    setQuestions(uniqueQuestions);
+  } catch (err) {
+    console.error(err);
+  }
+}, [token]);
 
-  /* // Yeni mesaj geldiğinde otomatik en alta kaydır
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+
+
+useEffect(() => {
+  fetchQuestions(); // dışarıdaki fonksiyon
+  const interval = setInterval(() => fetchQuestions(), 5000);
+  return () => clearInterval(interval);
+}, [fetchQuestions]); // dependency olarak ekle
+
+
+  // Mesajları çek
+const fetchMessages = async (questionId) => {
+  try {
+    const res = await axios.get(
+      `http://127.0.0.1:5000/doctor-question/${questionId}/messages`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setMessages(prev => ({ ...prev, [questionId]: res.data }));
+    // scrollToBottom(questionId); <- bunu kaldır
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+  // Mesaj gönder
+  const sendMessage = async (questionId) => {
+  if (!newMessage[questionId]?.trim()) return;
+  try {
+    await axios.post(
+      `http://127.0.0.1:5000/doctor-question/${questionId}/messages`,
+      { message: newMessage[questionId] },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setNewMessage(prev => ({ ...prev, [questionId]: "" }));
+    fetchMessages(questionId); // sadece mesajları güncelle
+    // fetchQuestions() çağrısını kaldır
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+  const scrollToBottom = (id) => {
+    if (messagesEndRef.current[id]) {
+      messagesEndRef.current[id].scrollIntoView({ behavior: "smooth" });
     }
-  }, [questions, activeTab]); */
+  };
+
+  // Chat scroll otomatik
+useEffect(() => {
+  if (activeQuestionId && messages[activeQuestionId]?.length > 0) {
+    scrollToBottom(activeQuestionId);
+  }
+}, [messages, activeQuestionId]);
+
+
+  const handleKeyPress = (e, questionId) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // yeni satır eklemez
+      sendMessage(questionId);
+    }
+  };
 
   return (
     <div className="doctor-panel">
-     
       <DoctorHeader />
-
       <div className="panel-body">
-       
         <div className="sidebar">
-          <h3>Doktor Panel</h3>
+          <h3>Gelen Sorular</h3>
           <ul>
-            <li
-              className={activeTab === "gelen" ? "active" : ""}
-              onClick={() => setActiveTab("gelen")}
-            >
-              Gelen Sorular
-            </li>
-            <li
-              className={activeTab === "yanitlanan" ? "active" : ""}
-              onClick={() => setActiveTab("yanitlanan")}
-            >
-              Yanıtlananlar
-            </li>
-            <li
-              className={activeTab === "ayarlar" ? "active" : ""}
-              onClick={() => setActiveTab("ayarlar")}
-            >
-              Ayarlar
-            </li>
+            {questions.map(q => (
+              <li
+                key={q.id}
+                className={activeQuestionId === q.id ? "active" : ""}
+                onClick={() => {
+                  setActiveQuestionId(q.id);
+                  fetchMessages(q.id);
+                }}
+              >
+                {q.subject} - {q.user_name} ({q.status})
+              </li>
+            ))}
           </ul>
         </div>
 
-     
         <div className="content">
-          
-
-     
-          <div className="messages-container-panel">
-            {activeTab === "gelen" &&
-              questions
-                .filter(q => q.status === "pending")
-                .map(q => (
-                  <div key={q.id} className="question-card">
-                    <p>
-                      <strong>{q.subject}</strong> - {q.user_name} ({q.status})
-                    </p>
-                    <p>{q.message}</p>
-                    <textarea
-                      placeholder="Cevap yaz..."
-                      value={replyMap[q.id] || ""}
-                      onChange={e => handleReplyChange(q.id, e.target.value)}
-                    />
-                    <button onClick={() => sendReply(q.id)}>Cevapla</button>
+          {activeQuestionId ? (
+            <div className="chat-container">
+              {/* Mesajlar scrollable alan */}
+              <div className="messages-wrapper">
+                {(messages[activeQuestionId] || []).map((m) => (
+                  <div
+                    key={m.id}
+                    className={`message ${m.sender === "doctor" ? "doctor" : "user"}`}
+                  >
+                    <p>{m.message}</p>
+                    <small>{new Date(m.created_at).toLocaleString()}</small>
                   </div>
                 ))}
-
-            {activeTab === "yanitlanan" &&
-              questions
-                .filter(q => q.status === "answered")
-                .map(q => (
-                  <div key={q.id} className="question-card">
-                    <p>
-                      <strong>{q.subject}</strong> - {q.user_name} ({q.status})
-                    </p>
-                    <p>{q.message}</p>
-                    <p>
-                      <em>Cevap: {q.doctor_reply}</em>
-                    </p>
-                  </div>
-                ))}
-
-            {activeTab === "ayarlar" && (
-              <div>
-                <h2>Ayarlar</h2>
-                <p>Burada doktor ayarları yer alacak.</p> 
+                <div
+                  ref={(el) => (messagesEndRef.current[activeQuestionId] = el)}
+                />
               </div>
-            )}
 
-            
-            <div ref={messagesEndRef} />
-          </div>
+              {/* Mesaj input sabit alt kısımda */}
+              <div className="message-input-wrapper">
+                <div className="message-input">
+                  <textarea
+                    rows={2}
+                    placeholder="Mesajınızı yazın..."
+                    value={newMessage[activeQuestionId] || ""}
+                    onChange={(e) =>
+                      setNewMessage((prev) => ({
+                        ...prev,
+                        [activeQuestionId]: e.target.value,
+                      }))
+                      
+                    }
+                    onKeyDown={(e) => handleKeyPress(e, activeQuestionId)}
+                  />
+                  <button onClick={() => sendMessage(activeQuestionId)}>Gönder</button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p>Bir soru seçin ve mesajları görüntüleyin.</p>
+          )}
         </div>
+
+
+
       </div>
     </div>
   );
