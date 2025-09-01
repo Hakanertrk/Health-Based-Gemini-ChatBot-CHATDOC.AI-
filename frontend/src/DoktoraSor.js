@@ -24,6 +24,7 @@ export default function DoktoraSor({ token }) {
   }, [token]);
 
   // Mesajları çek
+// 1️⃣ fetchMessages içinden ve messages useEffect’inden scrollToBottom’u kaldır
 const fetchMessages = useCallback(
   async (qId = selectedQuestion?.id) => {
     if (!qId) return;
@@ -32,7 +33,8 @@ const fetchMessages = useCallback(
         `http://127.0.0.1:5000/doctor-question/${qId}/messages`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setMessages(res.data); // scroll useEffect ile tetiklenecek
+      setMessages(res.data);
+      // ❌ scrollToBottom(); <-- kaldır
     } catch (err) {
       console.error("Mesajlar alınamadı:", err);
     }
@@ -62,31 +64,38 @@ const fetchMessages = useCallback(
 
 
   // Mesaj gönder
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedQuestion) return;
-    try {
-      await axios.post(
-        `http://127.0.0.1:5000/doctor-question/${selectedQuestion.id}/messages`,
-        { message: newMessage },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setNewMessage("");
-      fetchMessages();
-    } catch (err) {
-      console.error("Mesaj gönderilemedi:", err);
-    }
-  };
+// 2️⃣ sendMessage sonrası scroll yap
+const sendMessage = async () => {
+  if (!newMessage.trim() || !selectedQuestion) return;
+  try {
+    await axios.post(
+      `http://127.0.0.1:5000/doctor-question/${selectedQuestion.id}/messages`,
+      { message: newMessage },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setNewMessage("");
+    await fetchMessages();  // mesajları güncelle
+    scrollToBottom();       // sadece yeni mesaj sonrası scroll
+  } catch (err) {
+    console.error("Mesaj gönderilemedi:", err);
+  }
+};
+const [prevMessagesLength, setPrevMessagesLength] = useState(0);
 
-  const scrollToBottom = () => {
+useEffect(() => {
+  if (messages.length > prevMessagesLength) {
+    scrollToBottom();
+  }
+  setPrevMessagesLength(messages.length);
+}, [messages, prevMessagesLength]); // ✅
+
+const scrollToBottom = () => {
   if (messagesEndRef.current) {
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   }
 };
-useEffect(() => {
-  if (messages.length > 0) {
-    scrollToBottom();
-  }
-}, [messages]);
+
+
 
   // Bir soruyu seç ve mesajları göster
   const openChat = (question) => {

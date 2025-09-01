@@ -14,6 +14,7 @@ export default function Register() {
   const [license_number, setLicense_number] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [gender, setGender] = useState("");
 
   const navigate = useNavigate(); //  yönlendirme hook
 
@@ -38,6 +39,7 @@ export default function Register() {
         lastname,
         username,
         password,
+        gender,
         role: activeTab, // 'user' veya 'doctor'
         ...(activeTab === "doctor" && { specialization, license_number }),
       });
@@ -50,6 +52,7 @@ export default function Register() {
       setPassword("");
       setSpecialization("");
       setLicense_number("");
+      setGender("");
     
 
    
@@ -112,6 +115,12 @@ export default function Register() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <select value={gender} onChange={(e) => setGender(e.target.value)}>
+          <option value="">Cinsiyet </option>
+          <option value="male">Erkek</option>
+          <option value="female">Kadın</option>
+          <option value="other">Diğer</option>
+        </select>
         {/* Doktor için ekstra alanlar */}
         {activeTab === "doctor" && (
           <>

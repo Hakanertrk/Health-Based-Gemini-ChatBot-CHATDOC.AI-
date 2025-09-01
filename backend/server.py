@@ -178,6 +178,7 @@ def register():
     password = data.get("password")
     firstname = data.get("firstname", "")
     lastname = data.get("lastname", "")
+    gender = data.get("gender", "")
     role = data.get("role", "user")  # default user
     specialization = data.get("specialization") if role == "doctor" else None
     license_number = data.get("license_number") if role == "doctor" else None
@@ -195,19 +196,20 @@ def register():
     if role == "doctor":
         cursor.execute(
             """
-            INSERT INTO users (username, password_hash, firstname, lastname, role, specialization, license_number)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO users (username, password_hash, firstname, lastname, gender, role, specialization, license_number)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """,
-            (username, hashed_pw, firstname, lastname, role, specialization, license_number)
+            (username, hashed_pw, firstname, lastname, gender, role, specialization, license_number)
         )
     else:
         cursor.execute(
             """
-            INSERT INTO users (username, password_hash, firstname, lastname, role)
-            VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO users (username, password_hash, firstname, lastname, gender, role)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
-            (username, hashed_pw, firstname, lastname, role)
+            (username, hashed_pw, firstname, lastname, gender, role)
         )
+
 
     conn.commit()
 
@@ -270,28 +272,29 @@ def profile():
 
     if request.method == "GET":
         cursor.execute(
-            "SELECT username, firstname, lastname, age, height, weight, chronic, avatar FROM users WHERE username=%s",
+            "SELECT username, firstname, lastname, gender, age, height, weight, chronic, avatar FROM users WHERE username=%s",
             (username,)
         )
         row = cursor.fetchone()
         if not row:
             return jsonify({"error": "Kullanıcı bulunamadı"}), 404
 
-        avatar_filename = row[7]
+        avatar_filename = row[8]
         avatar_url = f"http://127.0.0.1:5000/uploads/{avatar_filename}" if avatar_filename else ""
 
         return jsonify({
             "username": row[0],
             "firstname": row[1] or "",
             "lastname": row[2] or "",
-            "age": row[3] or "",
-            "height": row[4] or "",
-            "weight": row[5] or "",
-            "chronic_diseases": row[6] or "",
+            "gender": row[3] or "",
+            "age": row[4] or "",
+            "height": row[5] or "",
+            "weight": row[6] or "",
+            "chronic_diseases": row[7] or "",
             "avatar": avatar_url
         })
 
-    # POST: profil güncelleme
+    # POST: profil güncelleme (gender hariç!)
     data = request.json
     cursor.execute(
         """
@@ -304,8 +307,15 @@ def profile():
             chronic = COALESCE(%s, chronic)
         WHERE username=%s
         """,
-        (data.get("firstname"), data.get("lastname"), data.get("age"),
-         data.get("height"), data.get("weight"), data.get("chronic_diseases"), username)
+        (
+            data.get("firstname"),
+            data.get("lastname"),
+            data.get("age"),
+            data.get("height"),
+            data.get("weight"),
+            data.get("chronic_diseases"),
+            username
+        )
     )
     conn.commit()
     return jsonify({"message": "Profil güncellendi"})
@@ -585,12 +595,12 @@ def doctor_questions():
         
         # Soruları getir
         cursor.execute("""
-            SELECT q.id, q.subject, m.message, u.username AS user_name, q.status, 
-                   MAX(CASE WHEN m.sender='doctor' THEN m.message END) AS doctor_reply
+            SELECT q.id, q.subject, m.message, u.username AS user_name, u.gender, q.status, 
+                MAX(CASE WHEN m.sender='doctor' THEN m.message END) AS doctor_reply
             FROM doctor_questions q
             JOIN users u ON q.user_id = u.id
             JOIN doctor_messages m ON m.question_id = q.id
-            GROUP BY q.id, q.subject, m.message, u.username, q.status
+            GROUP BY q.id, q.subject, m.message, u.username, u.gender, q.status
             ORDER BY q.created_at DESC
         """)
         questions = cursor.fetchall()
@@ -600,8 +610,9 @@ def doctor_questions():
                 "subject": q[1],
                 "message": q[2],
                 "user_name": q[3],
-                "status": q[4],
-                "doctor_reply": q[5]
+                "gender": q[4],
+                "status": q[5],
+                "doctor_reply": q[6]
             } for q in questions
         ]
         return jsonify(result)

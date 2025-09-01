@@ -3,6 +3,7 @@ import axios from "axios";
 import DoctorHeader from "./DoctorHeader";
 import "./DoctorPanel.css";
 
+
 export default function DoctorPanel({ token }) {
   const [questions, setQuestions] = useState([]);
   const [activeQuestionId, setActiveQuestionId] = useState(null);
@@ -96,27 +97,37 @@ useEffect(() => {
     <div className="doctor-panel">
       <DoctorHeader />
       <div className="panel-body">
+        {/* Sidebar */}
         <div className="sidebar">
           <h3>Gelen Sorular</h3>
-          <ul>
+          <div className="question-list">
             {questions.map(q => (
-              <li
+              <div
                 key={q.id}
-                className={activeQuestionId === q.id ? "active" : ""}
+                className={`question-card ${activeQuestionId === q.id ? "active" : ""}`}
                 onClick={() => {
                   setActiveQuestionId(q.id);
                   fetchMessages(q.id);
                 }}
               >
-                {q.subject} - {q.user_name} ({q.status})
-              </li>
+                <div className="question-header">
+                  <strong>{q.subject}</strong>
+                  <span className={`status ${q.status.toLowerCase()}`}>{q.status}</span>
+                </div>
+
+                <div className="question-user">
+                  {q.gender === "female" ? "👩" : q.gender === "male" ? "👨" : "🧑"} {q.user_name}
+                </div>
+
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
+
 
         <div className="content">
           {activeQuestionId ? (
-            <div className="chat-container">
+            <div className="chat-container-panel">
               {/* Mesajlar scrollable alan */}
               <div className="messages-wrapper">
                 {(messages[activeQuestionId] || []).map((m) => (

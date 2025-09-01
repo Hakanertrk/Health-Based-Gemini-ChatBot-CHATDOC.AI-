@@ -89,10 +89,33 @@ body {
 
   padding-left: 20px  ; /* sol boşluk ekledik */
 
-
-  
-
 } 
+
+/* Register.js select cinsiyet için auth-container */
+.auth-container select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.auth-container select:focus {
+  outline: none;
+  border-color: #a749ee;
+  box-shadow: 0 0 4px rgba(167, 73, 238, 0.5);
+}
+
+.auth-container select option {
+  padding: 10px;
+}
+
+/* opsiyonel: sağ üst köşede ok simgesi eklemek için */
+
+
 .auth-page {
   display: flex;
   flex-direction: column;
@@ -122,12 +145,13 @@ body {
 
 .auth-form input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 16px;
+  font-size: 14px;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .auth-form input:focus {
@@ -962,218 +986,8 @@ button:active {
   cursor: pointer;
 }
 
-/* -------------------- doctor panel -------------------- */
-
-/* =======================
-   Ana Panel
-======================= */
-.doctor-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-  /* header’ın altında içerik başlasın */
-  padding: 20px;
-}
-
-/* Header sabit üstte */
-.header, .doctor-panel > .DoctorHeader {
-  height: 60px;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
-
-/* Panel body (sidebar + content) */
-.panel-body {
-  display: flex;
-  height: calc(100vh - 60px); /* header altından başlar */
-  margin-top: 60px; /* header kadar boşluk */
-}
-
-/* =======================
-   Sidebar
-======================= */
-.sidebar {
-  width: 220px;
-  background: #f8f8f8;
-  padding: 15px;
-  position: fixed; /* sabit */
-  top: 60px; /* header altından başlar */
-  left: 0;
-  bottom: 0;
-  overflow-y: auto; /* çok kategori olursa scroll */
-  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-}
-
-.sidebar h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 16px;
-  color: #565656;
-}
-
-.sidebar ul {
-  
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar li {
-  padding: 10px;
-  
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
-  border-radius: 5px;
-  transition: background 0.2s;
-  margin-bottom: 5px;
-}
-
-.sidebar li:hover {
-  background: #eaeaea;
-}
-
-.sidebar li.active {
-  background: #7c3aed;
-  color: white;
-}
-
-/* =======================
-   Sağ taraf içerik
-======================= */
-.content {
-  margin-left: 220px; /* sidebar genişliği kadar boşluk */
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 10px 20px;
-  box-sizing: border-box;
-}
-
-/* Başlık */
-.content h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-/* =======================
-   Mesajlar
-======================= */
-.messages-container {
-  flex: 1; /* kalan tüm alanı kaplar */
-  max-height: 100vh;
-  overflow-y: scroll;
-  background-color: rgba(250, 250, 250, 0.3);
-  border-radius: 5px;
-  padding: 10px 0;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.20);
-}
-.messages-container-panel {
-   flex: 1; /* kalan tüm alanı kaplar */
- 
-  overflow-y: auto;
-  background-color: rgba(250, 250, 250, 0.3);
-  border-radius: 5px;
-  padding: 10px 0;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.20);
-}
 
 
-/* Soru Kartları */
-.question-card {
-
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 12px; /* içerik ile kart kenarı arası */
-  margin: 5px 10px; /* üst-alt 5px, sağ-sol 10px boşluk */
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-
-.question-card p {
-  margin: 5px 0;
-}
-
-.question-card textarea {
-  width: 100%;
-  min-height: 60px;
-  margin-top: 10px;
-  padding: 8px;
-  box-sizing: border-box;
-  border-radius: 6px;
-  border: 1px solid #aaa;
-  resize: vertical;
-}
-
-.question-card button {
-  margin-top: 5px;
-  font-size: 12px;
-  padding: 6px 10px;
-  background-color: #7e57c2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.question-card button:hover {
-  background-color: #6a1b9a;
-}
-
-
-/* -------------------- doctor panel header -------------------- */
-
-.doctor-header {
-  position: fixed;      /* sayfanın üstüne sabitlenir */
-  top: 0;               /* yukarıdan sıfır */
-  left: 0;              /* soldan sıfır */
-  width: 100%;          /* boydan boya */
-  height: 60px;         /* header yüksekliği */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;      /* iç boşluk sağ/sol */
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
-  z-index: 1000;        /* her şeyin üstünde */
-}
-
-
-
-.doctor-logo {
-  height: 40px;
-  width: auto;
-}
-
-.doctor-logout {
-  box-sizing: border-box;
-  background-color: #4a148c;
-  color: white;
-  border: none;
-  margin-right: 40px;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.doctor-logout:hover {
-  background-color: #6a1b9a;
-}
-.doctor-logout:active {
-  transform: scale(0.95);
-}
 
 
 

@@ -10,7 +10,8 @@ export default function Profile({ token }) {
     age: "",
     height: "",
     weight: "",
-    chronic_diseases: ""
+    chronic_diseases: "",
+    gender: ""
   });
   const [loading, setLoading] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -68,11 +69,14 @@ export default function Profile({ token }) {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.post("http://127.0.0.1:5000/profile", userData, {
+      // gender backend tarafında değiştirilemez, o yüzden göndermiyoruz
+      const { gender, ...dataToUpdate } = userData;
+
+      await axios.post("http://127.0.0.1:5000/profile", dataToUpdate, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPopup(true);
-      setTimeout(() => setPopup(false), 3000);
+      setTimeout(() => setPopup(false), 2000);
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
@@ -111,6 +115,12 @@ export default function Profile({ token }) {
             <input type="text" name={field} value={userData[field]} onChange={handleChange} />
           </div>
         ))}
+
+        {/* Gender sadece okunabilir olacak */}
+        <div className="profile-field">
+          <label>Cinsiyet:</label>
+          <input type="text" value={userData.gender} disabled />
+        </div>
       </div>
 
       <button onClick={handleSave} disabled={loading} className="save-btn">
