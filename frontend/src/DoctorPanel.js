@@ -86,12 +86,14 @@ useEffect(() => {
 }, [messages, activeQuestionId]);
 
 
+
   const handleKeyPress = (e, questionId) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // yeni satır eklemez
       sendMessage(questionId);
     }
   };
+  
 
   return (
     <div className="doctor-panel">
@@ -99,7 +101,11 @@ useEffect(() => {
       <div className="panel-body">
         {/* Sidebar */}
         <div className="sidebar">
-          <h3>Gelen Sorular</h3>
+          <div className="sidebar-header">
+            <h2>
+              Merhabalar, Dr. {localStorage.getItem("firstname")} {localStorage.getItem("lastname")}
+            </h2>
+          </div>
           <div className="question-list">
             {questions.map(q => (
               <div

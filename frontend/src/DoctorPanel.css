@@ -61,6 +61,33 @@
   height: 100%; /* %100 olmalı */
   box-sizing: border-box;
 }
+
+.sidebar-header {
+  padding: 15px;
+  background-color: #6a1b9a; /* sade mor arka plan */
+  color: #fff;
+  text-align: center;
+  font-weight: 500;
+  font-size: 16px;
+  border-bottom: 1px solid #5a1685; /* hafif alt sınır */
+  border-radius: 0 0 6px 6px;
+}
+
+/* Responsive: mobilde font küçültme */
+@media (max-width: 768px) {
+  .sidebar-header {
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-header {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
 .question-list {
   display: flex;
   flex-direction: column;

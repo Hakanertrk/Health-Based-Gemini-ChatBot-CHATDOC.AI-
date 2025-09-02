@@ -226,25 +226,31 @@ def login():
     if not username or not password:
         return jsonify({"error": "Kullanıcı adı ve şifre boş olamaz"}), 400
 
-    #  role bilgisini de çekiyoruz
-    cursor.execute("SELECT password_hash, role FROM users WHERE username=%s", (username,))
+    # role + firstname + lastname bilgilerini çekiyoruz
+    cursor.execute("SELECT password_hash, role, firstname, lastname FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
     if not row or not check_password_hash(row[0], password):
         return jsonify({"error": "Kullanıcı adı veya şifre hatalı"}), 401
 
     role = row[1]
+    firstname = row[2]
+    lastname = row[3]
 
     token = jwt.encode({
         "username": username,
-        "role": role,  # token içine de role ekleyebilirsin (opsiyonel)
+        "role": role,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
     }, JWT_SECRET, algorithm="HS256")
 
     chat_history.setdefault(username, [])
     waiting_for_bot[username] = False
 
-    # role bilgisini de frontend'e gönderiyoruz
-    return jsonify({"token": token, "role": role})
+    return jsonify({
+        "token": token,
+        "role": role,
+        "firstname": firstname,
+        "lastname": lastname
+    })
 
 
 # -----------------------
@@ -723,10 +729,13 @@ def get_my_questions():
 
     cursor.execute(
         """
-        SELECT id, subject, message, doctor_reply, user_reply, status, created_at
-        FROM doctor_questions
-        WHERE user_id = %s
-        ORDER BY created_at DESC
+        SELECT 
+            q.id, q.subject, q.message, q.doctor_reply, q.user_reply, q.status, q.created_at,
+            d.id AS doctor_id, d.firstname, d.lastname, d.specialization
+        FROM doctor_questions q
+        LEFT JOIN users d ON q.doctor_id = d.id
+        WHERE q.user_id = %s
+        ORDER BY q.created_at DESC
         """,
         (user_id,)
     )
@@ -741,9 +750,52 @@ def get_my_questions():
             "doctor_reply": q[3],
             "user_reply": q[4],
             "status": q[5],
-            "created_at": q[6].strftime("%Y-%m-%d %H:%M:%S")
+            "created_at": q[6].strftime("%Y-%m-%d %H:%M:%S"),
+            "doctor": {
+                "id": q[7],
+                "firstname": q[8],
+                "lastname": q[9],
+                "specialization": q[10]
+            } if q[7] else None
         })
     return jsonify(result)
+
+
+@app.route("/my-questions/<int:question_id>", methods=["DELETE"])
+def delete_my_question(question_id):
+    # Token kontrolü
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token eksik"}), 401
+    token = auth_header.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        username = decoded["username"]
+    except:
+        return jsonify({"error": "Geçersiz token"}), 401
+
+    # Kullanıcı ID'sini al
+    cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
+    row = cursor.fetchone()
+    if not row:
+        return jsonify({"error": "Kullanıcı bulunamadı"}), 404
+    user_id = row[0]
+
+    # Soruya ait user kontrolü ve silme
+    cursor.execute(
+        "DELETE FROM doctor_questions WHERE id=%s AND user_id=%s RETURNING id",
+        (question_id, user_id)
+    )
+    deleted = cursor.fetchone()
+    conn.commit()
+
+    if deleted:
+        return jsonify({"message": "Soru silindi"})
+    else:
+        return jsonify({"error": "Soru bulunamadı veya yetkisiz"}), 404
+
+
 
 # -----------------------
 # doktor seçme

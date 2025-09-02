@@ -61,13 +61,14 @@
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s;
+  font-size: 16px;
 }
+
 
 .hp-auth button:hover {
   background: #6a1b9a;
   color: white;
 }
-
 .hp-hero {
   padding: 120px 20px;
   background: linear-gradient(90deg, #6a1b9a 0%, #a35cd0 100%);
@@ -100,6 +101,40 @@
 .hp-cta:hover {
   background-color: #6a1b9a;
   color: white;
+}
+
+@media (max-width: 768px) {
+  .hp-auth button {
+    padding: 6px 12px;
+    font-size: 14px;
+    margin-left: 5px;
+  }
+
+  .hp-cta {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hp-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hp-auth button {
+    width: 100%;
+    margin-left: 0;
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .hp-cta {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
 }
 
 .hp-features {

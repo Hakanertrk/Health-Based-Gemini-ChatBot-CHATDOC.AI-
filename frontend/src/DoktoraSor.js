@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import "./DoktoraSor.css";
+import { FaTrash } from "react-icons/fa";
 
 export default function DoktoraSor({ token }) {
   const [questions, setQuestions] = useState([]); // Tüm soru başlıkları
@@ -9,8 +10,8 @@ export default function DoktoraSor({ token }) {
   const [newMessage, setNewMessage] = useState("");
   const [subject, setSubject] = useState(""); // Yeni soru başlığı
   const [initialMessage, setInitialMessage] = useState(""); // Yeni soru mesajı
-  const [doctors, setDoctors] = useState([]); // ✅ Doktor listesi
-  const [selectedDoctor, setSelectedDoctor] = useState(""); // ✅ Seçilen doktor
+  const [doctors, setDoctors] = useState([]); // Doktor listesi
+  const [selectedDoctor, setSelectedDoctor] = useState(""); // Seçilen doktor
   const messagesEndRef = useRef(null); // Scroll için ref
 
   // Kullanıcının tüm sorularını çek
@@ -49,13 +50,25 @@ const fetchMessages = useCallback(
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages(res.data);
-      // ❌ scrollToBottom(); <-- kaldır
+      // scrollToBottom(); 
     } catch (err) {
       console.error("Mesajlar alınamadı:", err);
     }
   },
   [selectedQuestion, token]
 );
+
+const deleteQuestion = async (id) => {
+  try {
+    await axios.delete(`http://127.0.0.1:5000/my-questions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    fetchQuestions(); // listeyi güncelle
+    if (selectedQuestion?.id === id) setSelectedQuestion(null); // açık chat varsa kapat
+  } catch (err) {
+    console.error("Soru silinemedi:", err);
+  }
+};
 
   // Yeni soru oluştur
 const createQuestion = async () => {
@@ -66,7 +79,7 @@ const createQuestion = async () => {
         {
           subject,
           message: initialMessage,
-          doctor_id: selectedDoctor, // ✅ Doktor ID ekleniyor
+          doctor_id: selectedDoctor, //  Doktor ID ekleniyor
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -139,7 +152,7 @@ const scrollToBottom = () => {
 
   return (
     <div className="doktor-sor-container">
-      <h2>Doktor ile Mesajlaşma</h2>
+      <h2>Doktor'a Sor</h2>
 
       {/* Yeni soru oluşturma */}
       <div className="new-question">
@@ -171,27 +184,43 @@ const scrollToBottom = () => {
       </div>
 
       {/* Soru başlıkları listesi */}
-      <h3>Mevcut Sorular</h3>
-        <div className="question-list">
-          {questions.map((q) => {
-            const statusText =
-              q.status.toLowerCase() === "pending"
-                ? "Mesaj Bekleniyor"
-                : q.status.toLowerCase() === "answered"
-                ? "Cevaplandı"
-                : q.status;
+      <h3>Sorular</h3>
+      <div className="question-list">
+        {questions.map((q) => {
+          const statusText =
+            q.status.toLowerCase() === "pending"
+              ? "Mesaj Bekleniyor"
+              : q.status.toLowerCase() === "answered"
+              ? "Cevaplandı"
+              : q.status;
 
-            return (
-              <div
-                key={q.id}
-                className={`question-item ${selectedQuestion?.id === q.id ? "active" : ""}`}
-                onClick={() => openChat(q)}
-              >
-                {q.subject} ({statusText})
+          const doctorName = q.doctor 
+            ? `${q.doctor.firstname} ${q.doctor.lastname} - ${q.doctor.specialization}` 
+            : "Bilinmiyor";
+          return (
+            <div
+              key={q.id}
+              className={`question-item ${selectedQuestion?.id === q.id ? "active" : ""}`}
+              onClick={() => openChat(q)}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  {q.subject} ({statusText})<br />
+                  <small>Doktor: {doctorName}</small>
+                </div>
+                <FaTrash
+                  style={{ cursor: "pointer", color: "#6f6f6fff" }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // chat açılmasını engelle
+                    deleteQuestion(q.id);
+                  }}
+                />
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+
+      </div>
 
 
       {/* Mesaj kutucuğu */}
