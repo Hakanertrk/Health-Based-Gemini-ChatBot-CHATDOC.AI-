@@ -155,15 +155,18 @@ const scrollToBottom = () => {
           placeholder="Sorunuzu yazın..."
           rows="3"
         />
-        <select
-          value={selectedDoctor}
-          onChange={(e) => setSelectedDoctor(e.target.value)}
-        >
-          <option value="">Bir doktor seçin</option>
-          {doctors.map((d) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+      <select
+        value={selectedDoctor}
+        onChange={(e) => setSelectedDoctor(e.target.value)}
+      >
+        <option value="">Bir doktor seçin</option>
+        {doctors.map((d) => (
+          <option key={d.id} value={d.id}>
+            {d.firstname} {d.lastname} - {d.specialization}
+          </option>
+        ))}
+      </select>
+
         <button onClick={createQuestion}>Soruyu Gönder</button>
       </div>
 

@@ -132,3 +132,22 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
+.new-question select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  box-sizing: border-box;
+  background-color: #fff;
+  cursor: pointer;
+  appearance: none; /* default ok işaretini gizler (isteğe bağlı) */
+  transition: border 0.2s, background-color 0.2s;
+}
+
+.new-question select:focus {
+  border-color: #ba48d9;
+  background-color: #fdf4ff;
+  outline: none;
+}
