@@ -19,6 +19,12 @@
   height: 40px; /* istediğin boyutu ver */
   width: auto;
 }
+.hp-logo button{
+  border: "none";
+  background: "none"; 
+  padding: 0;
+  cursor: "pointer" 
+}
 
 .hp-nav a {
   margin: 0 15px;
@@ -52,10 +58,11 @@
 }
 
 .hp-auth button {
-  margin-left: 10px;
+ 
+  margin-left: 5px;
   padding: 8px 16px;
-  border: 2px solid #6a1b9a;
-  border-radius: 5px;
+
+  
   background: white;
   color: #6a1b9a;
   font-weight: bold;
@@ -70,20 +77,42 @@
   color: white;
 }
 .hp-hero {
-  padding: 120px 20px;
-  background: linear-gradient(90deg, #6a1b9a 0%, #a35cd0 100%);
-  color: white;
+  min-height: 70vh;              /* dikeyde genişletme */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;      /* dikey ortala */
+  align-items: center;          /* yatay ortala */
+  padding: 80px 20px;           /* içerik ile biraz boşluk bırak */
+  background-image: url('hero.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-blend-mode: normal;
+  color: #fff;
   text-align: center;
+  position: relative;
 }
 
+/* Opsiyonel: başlık boyutunu biraz büyüt */
 .hp-hero h1 {
-  font-size: 52px;
+  font-size: 56px;
   margin-bottom: 20px;
 }
 
 .hp-hero p {
   font-size: 20px;
   margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .hp-hero {
+    min-height: 50vh;
+    padding: 60px 16px;
+  }
+  .hp-hero h1 {
+    font-size: 34px;
+  }
 }
 
 .hp-cta {
@@ -143,6 +172,7 @@
   text-align: center;
 }
 
+
 .feature-cards {
   display: flex;
   justify-content: center;
@@ -156,8 +186,15 @@
   padding: 30px;
   border-radius: 12px;
   width: 250px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+ 
 }
+.feature-card:hover{
+  transition: all 0.3s;
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+}
+
 
 .hp-about, .hp-contact {
   padding: 80px 20px;

@@ -11,15 +11,44 @@ export default function HomePage({ token }) {
     <div className="homepage">
       {/* Navbar / Header */}
       <header className="hp-header">
-        <div  className="hp-logo">
-            <a href="#home" ><img src="/logo.png" alt="Logo"  /></a>
-            
+       <div className="hp-logo">
+          <a href="/home" onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}>
+            <img src="/logo.png" alt="Logo" />
+          </a>
         </div>
-        <nav className="hp-nav">
-          <a href="#features">Özellikler</a>
-          <a href="#about">Hakkımızda</a>
-          <a href="#contact">İletişim</a>
-        </nav>
+      <nav className="hp-nav">
+        <a
+          href="#features"
+          onClick={(e) => {
+            e.preventDefault();
+            document.querySelector("#features").scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          Özellikler
+        </a>
+        <a
+          href="#about"
+          onClick={(e) => {
+            e.preventDefault();
+            document.querySelector("#about").scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          Hakkımızda
+        </a>
+        <a
+          href="#contact"
+          onClick={(e) => {
+            e.preventDefault();
+            document.querySelector("#contact").scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          İletişim
+        </a>
+      </nav>
+
         <div className="hp-auth">
           <button onClick={() => navigate("/login")}>Giriş Yap</button>
           <button onClick={() => navigate("/register")}>Kayıt Ol</button>

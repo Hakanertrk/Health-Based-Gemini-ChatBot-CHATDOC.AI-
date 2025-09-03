@@ -37,6 +37,8 @@
 
 .doctor-logout:hover {
   background-color: #6a1b9a;
+  transition: ease;
+  transform: scale(1.05);
 }
 .doctor-logout:active {
   transform: scale(0.95);

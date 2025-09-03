@@ -138,6 +138,9 @@ Görevlerin:
 4. Referans dışı değer yoksa böyle devam etmesi için önerilerde bulun.
 Rapor metni:
 {text[:3000]}
+
+Tahlil raporunda doktor var ise ona yönlendir yok ise "Bizim Doktorlarımıza Doktora'a Sor Bölümünden danışabilirisiniz." benzeri bir ifade ekle.
+En sonda rapor sonucu ile ilgili öneri sorularda bulun.
 """
     try:
         response = requests.post(
@@ -357,11 +360,69 @@ def upload_avatar():
 def serve_uploads(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
+
+@app.route("/chats", methods=["GET"])
+def get_chats():
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token eksik"}), 401
+    token = auth_header.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        username = decoded["username"]
+    except:
+        return jsonify({"error": "Geçersiz token"}), 401
+
+    # Kullanıcının chatlerini al
+    user_chats = chat_history.get(username, {})
+    result = [{"chatId": cid, "title": f"Sohbet {cid}"} for cid in user_chats.keys()]
+    return jsonify(result)
+
+
+@app.route("/chats", methods=["POST"])
+def create_chat():
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token eksik"}), 401
+    token = auth_header.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        username = decoded["username"]
+    except:
+        return jsonify({"error": "Geçersiz token"}), 401
+
+    # ChatId belirle (mevcut max+1)
+    user_chats = chat_history.setdefault(username, {})
+    new_chat_id = max(user_chats.keys(), default=0) + 1
+    user_chats[new_chat_id] = []
+
+    return jsonify({"chatId": new_chat_id, "title": f"Sohbet {new_chat_id}"})
+
+@app.route("/chats/<int:chat_id>/messages", methods=["GET"])
+def get_chat_messages(chat_id):
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token eksik"}), 401
+    token = auth_header.split(" ")[1]
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        username = decoded["username"]
+    except:
+        return jsonify({"error": "Geçersiz token"}), 401
+
+    messages = chat_history.get(username, {}).get(chat_id, [])
+    return jsonify(messages)
+
+
 # -----------------------
 # Chat endpoint (CORS uyumlu)
 # -----------------------
-@app.route("/chat", methods=["POST", "OPTIONS"])
-def chat():
+@app.route("/chat/<int:chatid>", methods=["POST", "OPTIONS"])
+def chat(chatid):
     # OPTIONS isteği ise sadece CORS header dön
     if request.method == "OPTIONS":
         response = app.make_response("")
@@ -386,7 +447,7 @@ def chat():
     except InvalidTokenError:
         return jsonify({"error": "Geçersiz token"}), 401
 
-    if waiting_for_bot.get(username, False):
+    if waiting_for_bot.get((username, chatid), False):
         return jsonify({"error": "Bot cevabı gelmeden yeni mesaj gönderemezsiniz"}), 400
 
     data = request.json
@@ -394,13 +455,20 @@ def chat():
     if not user_message:
         return jsonify({"error": "Mesaj boş olamaz"}), 400
 
-    chat_history.setdefault(username, []).append({"sender": "user", "text": user_message})
-    waiting_for_bot[username] = True    
+    # -----------------------
+    # ChatId bazlı mesaj kaydı
+    # -----------------------
+    user_chats = chat_history.setdefault(username, {})
+    user_chat = user_chats.setdefault(chatid, [])
+    user_chat.append({"sender": "user", "text": user_message})
+    waiting_for_bot[(username, chatid)] = True
 
+    # -----------------------
     # Profil bilgileri ve ekstra info
-    cursor.execute("SELECT age, height, weight, chronic FROM users WHERE username=%s", (username,))
+    # -----------------------
+    cursor.execute("SELECT age, height, weight, chronic, gender FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
-    profile_info = {"age": row[0], "height": row[1], "weight": row[2], "chronic": row[3]} if row else {}
+    profile_info = {"age": row[0], "height": row[1], "weight": row[2], "chronic": row[3], "gender": row[4]} if row else {}
     extra_info = ""
     if profile_info.get("height") and profile_info.get("weight"):
         try:
@@ -417,18 +485,26 @@ def chat():
     if profile_info.get("chronic"):
         extra_info += f"Kullanıcının kronik hastalıkları: {profile_info['chronic']}. "
     if profile_info.get("age"):
-        extra_info += f"Kullanıcının yaşı: {profile_info['age']}. "    
+        extra_info += f"Kullanıcının yaşı: {profile_info['age']}. "  
+    if profile_info.get("gender"):
+        extra_info += f"Kullanıcının Cinsiyeti: {profile_info['gender']}"
 
+    # -----------------------
+    # Tehlikeli kelime kontrolü
+    # -----------------------
     is_danger = any(word in user_message.lower() for word in danger_words)
     bot_reply = ""
     if is_danger:
         bot_reply += "⚠️ Bu ciddi bir durum olabilir. Lütfen 112'yi arayın veya en yakın acile gidin.\n\n"
 
-    history_text = "".join([f"{m['sender'].capitalize()}: {m['text']}\n" for m in chat_history.get(username, [])[-10:]])
+    history_text = "".join([f"{m['sender'].capitalize()}: {m['text']}\n" for m in user_chat[-10:]])
 
+    # -----------------------
+    # AI prompt
+    # -----------------------
     prompt = f"""
 Sen bir genel sağlık asistanısın. Kullanıcıya güvenli ve evde uygulanabilir tavsiyeler ver.
-Sadece beslenme, yaşam tarzı ve basit çözümler öner. İlaç önerme.
+Sadece beslenme, yaşam tarzı ve basit çözümler öner.
 Cevap verirken nazik, anlaşılır ve destekleyici ol. Gerektiğinde örnekler ver.
 Cevaplarını **okunabilir şekilde başlık ve maddeler kullanarak ver**, uzun tek paragraflar oluşturma. 
 Her adımı numaralandır veya maddele, gerekli yerlerde yeni satıra başlat.
@@ -460,10 +536,11 @@ Her cevabın sonunda, kullanıcının kendine dikkat etmesi için basit bir hat�
         print("API Hatası:", e)
 
     bot_reply += normal_reply
-    chat_history.setdefault(username, []).append({"sender": "bot", "text": bot_reply})
-    waiting_for_bot[username] = False
+    user_chat.append({"sender": "bot", "text": bot_reply})
+    waiting_for_bot[(username, chatid)] = False
 
     return jsonify({"reply": bot_reply})
+
 
 # -----------------------
 # Appointments GET/POST/DELETE

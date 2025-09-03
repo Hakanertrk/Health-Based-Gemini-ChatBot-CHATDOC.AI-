@@ -132,6 +132,25 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
+
+
+/* Mesajlarda ekli dosyalar */
+.attachments {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attachments a {
+  color: #6a1b9a;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.attachments a:hover {
+  text-decoration: underline;
+}
 .new-question select {
   width: 100%;
   padding: 10px;

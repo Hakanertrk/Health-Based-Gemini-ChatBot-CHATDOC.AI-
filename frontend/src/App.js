@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import ChatBox from "./ChatBox";
+import ChatSidebar from "./ChatSidebar";
 import Login from "./Login";
 import Register from "./Register";
 import Profile from "./Profile";
@@ -13,11 +14,35 @@ import axios from "axios";
 import DoktoraSor from "./DoktoraSor";
 
 function ChatPage({ token }) {
+  const [chats, setChats] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [newAppt, setNewAppt] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [error, setError] = useState("");
 
+  // -----------------------
+  // Chat listesini çek
+  // -----------------------
+  useEffect(() => {
+    if (!token) return;
+    const fetchChats = async () => {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/chats", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setChats(res.data);
+        if (res.data.length > 0 && !selectedChat) setSelectedChat(res.data[0].id);
+      } catch (err) {
+        console.error("Chats yüklenemedi:", err.response?.data || err.message);
+      }
+    };
+    fetchChats();
+  }, [token]);
+
+  // -----------------------
+  // Randevuları çek
+  // -----------------------
   useEffect(() => {
     if (token) {
       const fetchAppointments = async () => {
@@ -69,8 +94,30 @@ function ChatPage({ token }) {
     }
   };
 
+  const createNewChat = async () => {
+    try {
+      const res = await axios.post(
+        "http://127.0.0.1:5000/chats",
+        { title: "Yeni Sohbet" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setChats((prev) => [...prev, res.data]);
+      setSelectedChat(res.data.id);
+    } catch (err) {
+      console.error("Yeni chat oluşturma hatası:", err.response?.data || err.message);
+    }
+  };
+
   return (
-    <div className="app-container">
+    <div className="app-container chat-page">
+      <ChatSidebar
+        token={token}
+        selectedChat={selectedChat}
+        onSelectChat={setSelectedChat}
+        onNewChat={createNewChat}
+      />
+      <ChatBox token={token} selectedChat={selectedChat} />
+
       <div className="appointment-panel">
         <h3>📅 Randevular</h3>
         <ul className="appt-list">
@@ -113,8 +160,6 @@ function ChatPage({ token }) {
           </button>
         </div>
       </div>
-
-      <ChatBox token={token} />
     </div>
   );
 }
@@ -123,35 +168,28 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const navigate = useNavigate();
   const location = useLocation();
-  
-  
   const [, setQuestions] = useState([]);
-  
+
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     navigate("/login");
   };
 
-  
+  const fetchUserQuestions = useCallback(async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:5000/my-questions", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuestions(res.data);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  }, [token]);
 
-    
-
-
-const fetchUserQuestions = useCallback(async () => {
-  try {
-    const res = await axios.get("http://127.0.0.1:5000/my-questions", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setQuestions(res.data);
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-  }
-}, [token]); // token bağımlılık olarak kalmalı
-
-useEffect(() => {
-  if (token) fetchUserQuestions();
-}, [token, fetchUserQuestions]);
+  useEffect(() => {
+    if (token) fetchUserQuestions();
+  }, [token, fetchUserQuestions]);
 
   const showHeader =
     token &&
@@ -166,7 +204,7 @@ useEffect(() => {
 
       <Routes>
         <Route path="/home" element={<HomePage token={token} />} />
-        <Route path="/" element={<Navigate to= "/home" />} />
+        <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/register" element={<Register />} />
         <Route
@@ -179,11 +217,7 @@ useEffect(() => {
         />
         <Route path="/chat" element={token ? <ChatPage token={token} /> : <Navigate to="/login" />} />
         <Route path="/doktora-sor" element={<DoktoraSor token={token} />} />
-
-       
       </Routes>
-
-      
 
       <Footer />
     </div>
