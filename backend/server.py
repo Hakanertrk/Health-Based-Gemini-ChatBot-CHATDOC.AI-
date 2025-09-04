@@ -39,8 +39,10 @@ API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-fl
 # -----------------------
 # Kullanıcı chat durumları
 # -----------------------
-chat_history = {}  
-waiting_for_bot = {}  
+# chat_history: { username: { chatId: [ {sender, text}, ... ] } }
+chat_history = {}
+# waiting_for_bot key: (username, chatId)
+waiting_for_bot = {}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -161,8 +163,12 @@ En sonda rapor sonucu ile ilgili öneri sorularda bulun.
         bot_reply += "\n Önemli değerler referans aralıklarında."
     bot_reply += f"\n\nAI Önerisi:\n{ai_reply}"
 
-    chat_history.setdefault(username, []).append({"sender": "user", "text": f"[PDF dosyası yüklendi] {pdf_file.filename}"})
-    chat_history.setdefault(username, []).append({"sender": "bot", "text": f"[PDF Analizi]\n{bot_reply}"})
+    # PDF mesajlarını varsayılan sohbet 1'e yaz
+    user_chats = chat_history.setdefault(username, {})
+    if not user_chats:
+        user_chats[1] = []
+    user_chats[1].append({"sender": "user", "text": f"[PDF dosyası yüklendi] {pdf_file.filename}"})
+    user_chats[1].append({"sender": "bot", "text": f"[PDF Analizi]\n{bot_reply}"})
 
     return jsonify({"reply": bot_reply})
 
@@ -245,8 +251,14 @@ def login():
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
     }, JWT_SECRET, algorithm="HS256")
 
-    chat_history.setdefault(username, [])
-    waiting_for_bot[username] = False
+    # Kullanıcının chat yapısını garanti et (dict) ve varsayılan sohbeti oluştur
+    user_chats = chat_history.setdefault(username, {})
+    if not user_chats:
+        user_chats[1] = []
+    # Eski bekleme anahtarlarını temizle
+    for key in list(waiting_for_bot.keys()):
+        if isinstance(key, tuple) and key[0] == username:
+            waiting_for_bot.pop(key, None)
 
     return jsonify({
         "token": token,
@@ -362,6 +374,9 @@ def serve_uploads(filename):
 
 
 
+# -----------------------
+# Kullanıcının chatleri (sidebar)
+# -----------------------
 @app.route("/chats", methods=["GET"])
 def get_chats():
     auth_header = request.headers.get("Authorization", "")
@@ -375,12 +390,17 @@ def get_chats():
     except:
         return jsonify({"error": "Geçersiz token"}), 401
 
-    # Kullanıcının chatlerini al
+    # Kullanıcının chatlerini al (dict beklenir)
     user_chats = chat_history.get(username, {})
-    result = [{"chatId": cid, "title": f"Sohbet {cid}"} for cid in user_chats.keys()]
+    # chatId'leri artan sırada döndür
+    result = [{"chatId": cid, "title": f"Sohbet {cid}"} for cid in sorted(user_chats.keys())]
+
     return jsonify(result)
 
 
+# -----------------------
+# Yeni chat oluştur
+# -----------------------
 @app.route("/chats", methods=["POST"])
 def create_chat():
     auth_header = request.headers.get("Authorization", "")
@@ -394,13 +414,17 @@ def create_chat():
     except:
         return jsonify({"error": "Geçersiz token"}), 401
 
-    # ChatId belirle (mevcut max+1)
     user_chats = chat_history.setdefault(username, {})
     new_chat_id = max(user_chats.keys(), default=0) + 1
     user_chats[new_chat_id] = []
+    waiting_for_bot[(username, new_chat_id)] = False
 
     return jsonify({"chatId": new_chat_id, "title": f"Sohbet {new_chat_id}"})
 
+
+# -----------------------
+# Chat mesajlarını getir
+# -----------------------
 @app.route("/chats/<int:chat_id>/messages", methods=["GET"])
 def get_chat_messages(chat_id):
     auth_header = request.headers.get("Authorization", "")
@@ -419,11 +443,11 @@ def get_chat_messages(chat_id):
 
 
 # -----------------------
-# Chat endpoint (CORS uyumlu)
+# Chat endpoint (mesaj gönderme + AI cevap)
 # -----------------------
 @app.route("/chat/<int:chatid>", methods=["POST", "OPTIONS"])
 def chat(chatid):
-    # OPTIONS isteği ise sadece CORS header dön
+    # OPTIONS isteği için CORS
     if request.method == "OPTIONS":
         response = app.make_response("")
         response.headers["Access-Control-Allow-Origin"] = "*"
@@ -431,14 +455,11 @@ def chat(chatid):
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
         return response, 200
 
-    # -----------------------
-    # Normal POST (mesaj) işlemleri
-    # -----------------------
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
         return jsonify({"error": "Token eksik"}), 401
-
     token = auth_header.split(" ")[1]
+
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         username = decoded["username"]
@@ -447,6 +468,7 @@ def chat(chatid):
     except InvalidTokenError:
         return jsonify({"error": "Geçersiz token"}), 401
 
+    # Chat ID bazlı mesaj bekleme kontrolü
     if waiting_for_bot.get((username, chatid), False):
         return jsonify({"error": "Bot cevabı gelmeden yeni mesaj gönderemezsiniz"}), 400
 
@@ -455,72 +477,52 @@ def chat(chatid):
     if not user_message:
         return jsonify({"error": "Mesaj boş olamaz"}), 400
 
-    # -----------------------
-    # ChatId bazlı mesaj kaydı
-    # -----------------------
     user_chats = chat_history.setdefault(username, {})
     user_chat = user_chats.setdefault(chatid, [])
     user_chat.append({"sender": "user", "text": user_message})
+
     waiting_for_bot[(username, chatid)] = True
 
-    # -----------------------
-    # Profil bilgileri ve ekstra info
-    # -----------------------
+    # Profil ve ekstra info
     cursor.execute("SELECT age, height, weight, chronic, gender FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
-    profile_info = {"age": row[0], "height": row[1], "weight": row[2], "chronic": row[3], "gender": row[4]} if row else {}
     extra_info = ""
-    if profile_info.get("height") and profile_info.get("weight"):
-        try:
-            height_m = float(profile_info["height"]) / 100
-            bmi = float(profile_info["weight"]) / (height_m ** 2)
-            if bmi >= 32.5:
-                extra_info += "Kullanıcının obezite durumu var. "    
-            elif bmi >= 25:
-                extra_info += "Kullanıcı fazla kilolu. "
-            elif bmi < 18.5:
-                extra_info += "Kullanıcı zayıf. "
-        except:
-            pass
-    if profile_info.get("chronic"):
-        extra_info += f"Kullanıcının kronik hastalıkları: {profile_info['chronic']}. "
-    if profile_info.get("age"):
-        extra_info += f"Kullanıcının yaşı: {profile_info['age']}. "  
-    if profile_info.get("gender"):
-        extra_info += f"Kullanıcının Cinsiyeti: {profile_info['gender']}"
+    if row:
+        age, height, weight, chronic, gender = row
+        if height and weight:
+            try:
+                height_m = float(height) / 100
+                bmi = float(weight) / (height_m ** 2)
+                if bmi >= 32.5:
+                    extra_info += "Kullanıcının obezite durumu var. "    
+                elif bmi >= 25:
+                    extra_info += "Kullanıcı fazla kilolu. "
+                elif bmi < 18.5:
+                    extra_info += "Kullanıcı zayıf. "
+            except:
+                pass
+        if chronic:
+            extra_info += f"Kullanıcının kronik hastalıkları: {chronic}. "
+        if age:
+            extra_info += f"Kullanıcının yaşı: {age}. "  
+        if gender:
+            extra_info += f"Cinsiyeti: {gender}."
 
-    # -----------------------
     # Tehlikeli kelime kontrolü
-    # -----------------------
     is_danger = any(word in user_message.lower() for word in danger_words)
     bot_reply = ""
     if is_danger:
         bot_reply += "⚠️ Bu ciddi bir durum olabilir. Lütfen 112'yi arayın veya en yakın acile gidin.\n\n"
 
+    # AI cevabı
     history_text = "".join([f"{m['sender'].capitalize()}: {m['text']}\n" for m in user_chat[-10:]])
-
-    # -----------------------
-    # AI prompt
-    # -----------------------
     prompt = f"""
 Sen bir genel sağlık asistanısın. Kullanıcıya güvenli ve evde uygulanabilir tavsiyeler ver.
-Sadece beslenme, yaşam tarzı ve basit çözümler öner.
-Cevap verirken nazik, anlaşılır ve destekleyici ol. Gerektiğinde örnekler ver.
-Cevaplarını **okunabilir şekilde başlık ve maddeler kullanarak ver**, uzun tek paragraflar oluşturma. 
-Her adımı numaralandır veya maddele, gerekli yerlerde yeni satıra başlat.
-
 Konuşma geçmişi:
 {history_text if history_text else 'Yok.'}
-
 Kullanıcı profili: {extra_info if extra_info else "Özel bilgi yok."}
 Kullanıcının mesajı: {user_message}
-
-Yanıtın kısa ve öz (2-3 cümle) olmalı.
-Cevap Sonunda, cevabı destekliyecek ekstra bir öneride bulunmak için sor ve kullanıcı onaylarsa yap.
-Cevaplarını gerekli yerlerde madde madde yap.
-Cevaplarını gerekli yerlerde yeni satıra başlat.
-Gerektiğinde kullanıcıya motivasyon verici ve pozitif ifadeler kullan.
-Her cevabın sonunda, kullanıcının kendine dikkat etmesi için basit bir hatırlatma ekle (örn. "Bol su içmeyi unutmayın.").
+Yanıtın kısa ve öz olmalı.
 """
 
     try:
@@ -530,16 +532,19 @@ Her cevabın sonunda, kullanıcının kendine dikkat etmesi için basit bir hat�
             json={"contents": [{"parts": [{"text": prompt}]}]}
         )
         response.raise_for_status()
-        normal_reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        ai_reply = response.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
-        normal_reply = "⚠️ Bot cevabı alınamadı."
+        ai_reply = "⚠️ Bot cevabı alınamadı."
         print("API Hatası:", e)
 
-    bot_reply += normal_reply
+    bot_reply += ai_reply
     user_chat.append({"sender": "bot", "text": bot_reply})
+
     waiting_for_bot[(username, chatid)] = False
 
     return jsonify({"reply": bot_reply})
+
+
 
 
 # -----------------------

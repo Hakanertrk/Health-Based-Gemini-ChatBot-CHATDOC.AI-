@@ -6,13 +6,11 @@ export default function Message({ sender, text, type }) {
   const classes = `message ${sender} ${type || ""}`;
 
   return (
-    <div className={classes}>
+    <div className={classes} style={{ whiteSpace: "pre-wrap" }}>
       {Array.isArray(text) ? (
         text.map((t, i) => <p key={i}>{t}</p>)  // Çok parçalı cevap
-      ) : sender === "bot" ? (
-        <ReactMarkdown>{text}</ReactMarkdown>   // Bot mesajını Markdown olarak render et
       ) : (
-        <p>{text}</p>                            // Kullanıcı mesajını normal göster
+        <ReactMarkdown>{text}</ReactMarkdown>   // Hem bot hem kullanıcı için Markdown render
       )}
     </div>
   );

@@ -1,18 +1,20 @@
 /* Sidebar genel ayarlar */
-.sidebar {
-  position: fixed; /* Sabit pozisyon */
-  top: 0;
+.chat-sidebar {
+  position: fixed;
+  top: var(--header-height, 70px); /* Header yüksekliği kadar aşağıdan başla */
+  bottom: var(--footer-height, 15px); /* Footer üstüne kadar uzansın */
   left: 0;
-  width: 250px; /* Sidebar genişliği */
-  height: 100vh; /* Yukarıdan aşağıya kadar */
-  background-color: #1e1e2f; /* Koyu tema */
-  color: #fff;
+  width: 250px;
+  background-color: #1e1e2f !important;
+  color: #fff !important;
   display: flex;
   flex-direction: column;
   padding: 1rem;
   box-shadow: 2px 0 5px rgba(0,0,0,0.2);
   z-index: 1000;
-  overflow-y: auto; /* Çok chat olursa scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Yeni sohbet butonu */
@@ -46,6 +48,10 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e5e7eb;
 }
 
 .chat-item:hover {
@@ -55,4 +61,41 @@
 .chat-item.active {
   background-color: #4f46e5;
   font-weight: bold;
+  color: #ffffff;
+}
+
+/* Scrollbar düzeni */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.06);
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 8px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    top: 0;
+    bottom: auto;
+  }
+  .new-chat-btn {
+    align-self: stretch;
+  }
 }

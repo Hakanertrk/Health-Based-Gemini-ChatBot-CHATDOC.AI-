@@ -9,12 +9,11 @@ import Footer from "./Footer";
 import DoctorPanel from "./DoctorPanel";
 import Header from "./Header";
 import HomePage from "./HomePage";
-import "./App.css";
-import axios from "axios";
 import DoktoraSor from "./DoktoraSor";
+import axios from "axios";
+import "./App.css";
 
 function ChatPage({ token }) {
-  const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [newAppt, setNewAppt] = useState("");
@@ -22,41 +21,49 @@ function ChatPage({ token }) {
   const [error, setError] = useState("");
 
   // -----------------------
-  // Chat listesini çek
+  // Chat listesini çek ve seçili chat belirle
   // -----------------------
   useEffect(() => {
     if (!token) return;
-    const fetchChats = async () => {
+    const ensureChat = async () => {
       try {
         const res = await axios.get("http://127.0.0.1:5000/chats", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setChats(res.data);
-        if (res.data.length > 0 && !selectedChat) setSelectedChat(res.data[0].id);
+        const chats = res.data || [];
+        if (chats.length > 0) {
+          if (!selectedChat) setSelectedChat(chats[0].chatId);
+        } else {
+          const createRes = await axios.post(
+            "http://127.0.0.1:5000/chats",
+            { title: "Yeni Sohbet" },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setSelectedChat(createRes.data.chatId);
+        }
       } catch (err) {
-        console.error("Chats yüklenemedi:", err.response?.data || err.message);
+        console.error("Chats yüklenemedi/oluşturulamadı:", err.response?.data || err.message);
       }
     };
-    fetchChats();
-  }, [token]);
+    ensureChat();
+  }, [token, selectedChat]);
 
   // -----------------------
   // Randevuları çek
   // -----------------------
   useEffect(() => {
-    if (token) {
-      const fetchAppointments = async () => {
-        try {
-          const res = await axios.get("http://127.0.0.1:5000/appointments", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setAppointments(res.data);
-        } catch (err) {
-          console.error("Randevu çekme hatası:", err.response?.data || err.message);
-        }
-      };
-      fetchAppointments();
-    }
+    if (!token) return;
+    const fetchAppointments = async () => {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/appointments", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointments(res.data);
+      } catch (err) {
+        console.error("Randevu çekme hatası:", err.response?.data || err.message);
+      }
+    };
+    fetchAppointments();
   }, [token]);
 
   const addAppointment = async () => {
@@ -72,10 +79,7 @@ function ChatPage({ token }) {
         { title: newTitle, datetime: newAppt },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setAppointments((prev) => [
-        ...prev,
-        { id: res.data.id, title: newTitle, datetime: newAppt },
-      ]);
+      setAppointments(prev => [...prev, { id: res.data.id, title: newTitle, datetime: newAppt }]);
       setNewAppt("");
       setNewTitle("");
     } catch (err) {
@@ -88,7 +92,7 @@ function ChatPage({ token }) {
       await axios.delete(`http://127.0.0.1:5000/appointments/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAppointments((prev) => prev.filter((a) => a.id !== id));
+      setAppointments(prev => prev.filter(a => a.id !== id));
     } catch (err) {
       console.error("Randevu silme hatası:", err.response?.data || err.message);
     }
@@ -101,8 +105,7 @@ function ChatPage({ token }) {
         { title: "Yeni Sohbet" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setChats((prev) => [...prev, res.data]);
-      setSelectedChat(res.data.id);
+      setSelectedChat(res.data.chatId);
     } catch (err) {
       console.error("Yeni chat oluşturma hatası:", err.response?.data || err.message);
     }
@@ -121,16 +124,13 @@ function ChatPage({ token }) {
       <div className="appointment-panel">
         <h3>📅 Randevular</h3>
         <ul className="appt-list">
-          {appointments.map((a) => (
+          {appointments.map(a => (
             <li key={a.id} className="appt-item">
               <div className="appt-info">
                 <strong>{a.title}</strong>
                 <span>{new Date(a.datetime).toLocaleString()}</span>
               </div>
-              <button
-                onClick={() => deleteAppointment(a.id)}
-                className="appt-delete-button"
-              >
+              <button onClick={() => deleteAppointment(a.id)} className="appt-delete-button">
                 Sil
               </button>
             </li>
@@ -142,7 +142,7 @@ function ChatPage({ token }) {
             type="text"
             placeholder="Randevu ismi"
             value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
+            onChange={e => setNewTitle(e.target.value)}
             className="appt-input-title"
           />
           {error && !newAppt && <span className="appt-error">{error}</span>}
@@ -150,7 +150,7 @@ function ChatPage({ token }) {
           <input
             type="datetime-local"
             value={newAppt}
-            onChange={(e) => setNewAppt(e.target.value)}
+            onChange={e => setNewAppt(e.target.value)}
             className="appt-input"
           />
           {error && !newTitle && <span className="appt-error">{error}</span>}
@@ -177,6 +177,7 @@ function App() {
   };
 
   const fetchUserQuestions = useCallback(async () => {
+    if (!token) return;
     try {
       const res = await axios.get("http://127.0.0.1:5000/my-questions", {
         headers: { Authorization: `Bearer ${token}` },
@@ -188,8 +189,8 @@ function App() {
   }, [token]);
 
   useEffect(() => {
-    if (token) fetchUserQuestions();
-  }, [token, fetchUserQuestions]);
+    fetchUserQuestions();
+  }, [fetchUserQuestions]);
 
   const showHeader =
     token &&

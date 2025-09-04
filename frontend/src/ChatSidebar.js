@@ -5,46 +5,34 @@ import "./ChatSidebar.css";
 export default function ChatSidebar({ token, selectedChat, onSelectChat, onNewChat }) {
   const [chats, setChats] = useState([]);
 
-  // Kullanıcı adını decode ederek çekelim (chat_history backend'de username ile tutuluyor)
-  const [username, setUsername] = useState(null);
-
+  // Chatleri backend'den çek (/chats)
   useEffect(() => {
     if (!token) return;
 
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setUsername(payload.username);
-    } catch (err) {
-      console.error("Token decode edilemedi:", err);
-    }
-  }, [token]);
-
-  // Chatleri yükle
-  useEffect(() => {
-    if (!token || !username) return;
-
     const fetchChats = async () => {
       try {
-        const res = await axios.get("http://127.0.0.1:5000/history", {
+        const res = await axios.get("http://127.0.0.1:5000/chats", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Backend chat_history yapısı: { username: { chatId1: [...], chatId2: [...] } }
-        const userChats = res.data[username] || {};
-        const chatList = Object.keys(userChats).map(chatId => ({
-          id: chatId,
-          title: `Chat #${chatId}`
-        }));
+        // Beklenen format: [{ chatId, title }]
+        const chatList = (res.data || []).map(c => ({ id: c.chatId, title: c.title }));
         setChats(chatList);
+
+        // Eğer seçili chat yoksa ilkini seç
+        if (chatList.length > 0 && !selectedChat) {
+          onSelectChat(chatList[0].id);
+        }
       } catch (err) {
-        console.error("Chats yüklenemedi:", err);
+        console.error("Chats yüklenemedi:", err.response?.data || err.message);
       }
     };
+
     fetchChats();
-  }, [token, username]);
+  }, [token, selectedChat, onSelectChat]);
 
   return (
-    <div className="sidebar">
+    <div className="chat-sidebar">
       <button className="new-chat-btn" onClick={onNewChat}>＋ Yeni Sohbet</button>
       <ul className="chat-list">
         {chats.map(chat => (

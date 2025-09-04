@@ -12,34 +12,28 @@ export default function ChatBox({ token, selectedChat }) {
   const fileInputRef = useRef(null);
 
   // -----------------------
-  // Mesaj geçmişini seçili chat ID'ye göre çek
+  // Mesaj geçmişini çek (chatId bazlı)
   // -----------------------
   useEffect(() => {
     if (!token || !selectedChat) return;
 
-    const fetchHistory = async () => {
+    const fetchMessages = async () => {
       try {
-        const res = await axios.get("http://127.0.0.1:5000/history", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        // Backend chat_history yapısı: { username: { chatId: [...] } }
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const username = payload.username;
-
-        const userChats = res.data[username] || {};
-        const chatMessages = userChats[selectedChat] || [];
-        setMessages(chatMessages);
-      } catch (error) {
-        console.error("History Hatası:", error.response?.data || error.message);
+        const res = await axios.get(
+          `http://127.0.0.1:5000/chats/${selectedChat}/messages`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessages(res.data);
+      } catch (err) {
+        console.error("Mesaj geçmişi alınamadı:", err.response?.data || err.message);
       }
     };
 
-    fetchHistory();
+    fetchMessages();
   }, [token, selectedChat]);
 
   // -----------------------
-  // Mesaj scroll
+  // Scroll
   // -----------------------
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -68,10 +62,9 @@ export default function ChatBox({ token, selectedChat }) {
 
       const botReply = res.data?.reply || "⚠️ Yanıt alınamadı.";
       const botMsg = { sender: "bot", text: botReply };
-
       setMessages(prev => [...prev, botMsg]);
-    } catch (error) {
-      console.error("Backend Hatası:", error.response?.data || error.message);
+    } catch (err) {
+      console.error("Mesaj gönderme hatası:", err.response?.data || err.message);
       setMessages(prev => [
         ...prev,
         { sender: "bot", text: "⚠️ Bir hata oluştu. Lütfen tekrar deneyin." },
@@ -82,9 +75,16 @@ export default function ChatBox({ token, selectedChat }) {
   };
 
   // -----------------------
-  // PDF yükleme + analiz
+  // Enter ile gönder
   // -----------------------
-  const handleFileUpload = async (e) => {
+  const handleKeyDown = e => {
+    if (e.key === "Enter") sendMessage();
+  };
+
+  // -----------------------
+  // PDF yükleme (chat ID bazlı)
+  // -----------------------
+  const handleFileUpload = async e => {
     const file = e.target.files[0];
     if (!file || !selectedChat) return;
 
@@ -137,7 +137,7 @@ export default function ChatBox({ token, selectedChat }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder="Bir şey sor..."
-          onKeyDown={e => e.key === "Enter" && sendMessage()}
+          onKeyDown={handleKeyDown}
         />
         <button onClick={sendMessage} disabled={loading}>
           {loading ? "Gönderiliyor..." : "Gönder"}
