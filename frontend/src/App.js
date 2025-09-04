@@ -12,6 +12,8 @@ import HomePage from "./HomePage";
 import DoktoraSor from "./DoktoraSor";
 import axios from "axios";
 import "./App.css";
+import { FaTrash } from "react-icons/fa";
+
 
 function ChatPage({ token }) {
   const [selectedChat, setSelectedChat] = useState(null);
@@ -124,19 +126,21 @@ function ChatPage({ token }) {
       <div className="appointment-panel">
         <h3>📅 Randevular</h3>
         <ul className="appt-list">
-          {appointments.map(a => (
+          {appointments.map((a) => (
             <li key={a.id} className="appt-item">
               <div className="appt-info">
                 <strong>{a.title}</strong>
                 <span>{new Date(a.datetime).toLocaleString()}</span>
               </div>
-              <button onClick={() => deleteAppointment(a.id)} className="appt-delete-button">
-                Sil
-              </button>
+              <FaTrash
+                className="appt-delete-icon"
+                onClick={() => deleteAppointment(a.id)}
+                title="Randevuyu Sil"
+                style={{ cursor: "pointer", color: "#ff4d4f", fontSize: "1.2rem" }}
+              />
             </li>
           ))}
         </ul>
-
         <div className="appt-form">
           <input
             type="text"

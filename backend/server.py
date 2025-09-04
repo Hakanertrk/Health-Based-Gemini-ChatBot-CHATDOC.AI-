@@ -518,6 +518,7 @@ def chat(chatid):
     history_text = "".join([f"{m['sender'].capitalize()}: {m['text']}\n" for m in user_chat[-10:]])
     prompt = f"""
 Sen bir genel sağlık asistanısın. Kullanıcıya güvenli ve evde uygulanabilir tavsiyeler ver.
+Direk olarak kronik hastalığı hakkında bahsetmek yerine mesaj sonunda bu hastalık ile öneri ister misiniz gibi sorular ekle.
 Konuşma geçmişi:
 {history_text if history_text else 'Yok.'}
 Kullanıcı profili: {extra_info if extra_info else "Özel bilgi yok."}

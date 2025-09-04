@@ -2,7 +2,7 @@
 .chat-sidebar {
   position: fixed;
   top: var(--header-height, 70px); /* Header yüksekliği kadar aşağıdan başla */
-  bottom: var(--footer-height, 15px); /* Footer üstüne kadar uzansın */
+  bottom: var(--footer-height, 30px); /* Footer üstüne kadar uzansın */
   left: 0;
   width: 250px;
   background-color: #1e1e2f !important;
