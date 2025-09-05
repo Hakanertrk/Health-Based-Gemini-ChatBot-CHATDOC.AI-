@@ -141,7 +141,7 @@ Görevlerin:
 Rapor metni:
 {text[:3000]}
 
-Tahlil raporunda doktor var ise ona yönlendir yok ise "Bizim Doktorlarımıza Doktora'a Sor Bölümünden danışabilirisiniz." benzeri bir ifade ekle.
+Tahlil raporunda doktor var ise ona yönlendir yok ise Bizim Doktorlarımıza "Doktora'a Sor" Bölümünden danışabilirisiniz. benzeri bir ifade ekle.
 En sonda rapor sonucu ile ilgili öneri sorularda bulun.
 """
     try:
@@ -267,7 +267,6 @@ def login():
         "lastname": lastname
     })
 
-
 # -----------------------
 # Profile GET/POST
 # -----------------------
@@ -373,7 +372,6 @@ def serve_uploads(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-
 # -----------------------
 # Kullanıcının chatleri (sidebar)
 # -----------------------
@@ -392,8 +390,21 @@ def get_chats():
 
     # Kullanıcının chatlerini al (dict beklenir)
     user_chats = chat_history.get(username, {})
-    # chatId'leri artan sırada döndür
-    result = [{"chatId": cid, "title": f"Sohbet {cid}"} for cid in sorted(user_chats.keys())]
+    # Her sohbet için başlığı ilk kullanıcı mesajından türet
+    result = []
+    for cid in sorted(user_chats.keys()):
+        messages = user_chats.get(cid, [])
+        derived_title = None
+        for msg in messages:
+            if msg.get("sender") == "user" and msg.get("text"):
+                # İlk satırı al, çok uzunsa kısalt
+                first_line = msg["text"].strip().split("\n", 1)[0]
+                trimmed = first_line[:50]
+                derived_title = trimmed + ("..." if len(first_line) > 50 else "")
+                break
+        if not derived_title:
+            derived_title = f"Sohbet {cid}"
+        result.append({"chatId": cid, "title": derived_title})
 
     return jsonify(result)
 
@@ -517,14 +528,29 @@ def chat(chatid):
     # AI cevabı
     history_text = "".join([f"{m['sender'].capitalize()}: {m['text']}\n" for m in user_chat[-10:]])
     prompt = f"""
-Sen bir genel sağlık asistanısın. Kullanıcıya güvenli ve evde uygulanabilir tavsiyeler ver.
-Direk olarak kronik hastalığı hakkında bahsetmek yerine mesaj sonunda bu hastalık ile öneri ister misiniz gibi sorular ekle.
-Konuşma geçmişi:
-{history_text if history_text else 'Yok.'}
-Kullanıcı profili: {extra_info if extra_info else "Özel bilgi yok."}
-Kullanıcının mesajı: {user_message}
-Yanıtın kısa ve öz olmalı.
-"""
+    Sen bir güvenli, kısa ve pratik sağlık asistanısın. Aşağıdaki girdileri kullanarak açık, kullanıcı dostu ve eyleme geçirilebilir bir yanıt üret:
+
+    - Konuşma geçmişi:
+    {history_text if history_text else 'Yok.'}
+
+    - Kullanıcı profili ve ek bilgiler:
+    {extra_info if extra_info else 'Özel bilgi yok.'}
+
+    - Kullanıcının mesajı:
+    {user_message}
+
+    Yapılacaklar:
+    1) Kısa bir özetle (1-2 cümle) kullanıcı mesajına cevap ver.
+    2) Kullanıcının profili/ek bilgilerinden (yaş, kilo/ boy, kronik durumlar vb.) mantıklı ve ilgili bağlantılar kurarak gerektiğinde kısa uyarılar/sınırlamalar ekle.
+    3) Eğer tahlil/PDF sonucu veya referans dışı değerlerden bahsettiyse, önemli noktaları maddeleyerek basit öneriler ver.
+    4) Eğer durum acil görünüyorsa (solunum, göğüs ağrısı, bayılma vb.), NET olarak 112/yerel acil servise başvurmasını söyle ve neden acil olduğunu 1 cümleyle belirt.
+    5) Kronik hastalıklar hakkında doğrudan tedavi önerileri vermekten kaçın; bunun yerine “Kronik durumunuz var, isterseniz bu hastalığa özel öneriler ister misiniz?” şeklinde izin sorusu ekle.
+    6) Kısa, uygulanabilir evde bakım önerileri ver (maksimum 4 madde). Gerektiğinde doktor yönlendirmesi veya test tavsiyesi ekle.
+    7) Sonunda 1 adet açık takip sorusu sor (örn. “Bu şikayet ne zamandır var?” veya “Ağrı nerede, ne sıklıkla?”).
+    8) Yanıt 150-220 kelime arasında, net ve anlaşılır olsun. Tıbbi terimler varsa kısa açıklama ekle.
+
+    Çıktı sadece düz metin olmalı; kod, JSON veya uzun literatür alıntısı ekleme.
+    """
 
     try:
         response = requests.post(
@@ -544,8 +570,6 @@ Yanıtın kısa ve öz olmalı.
     waiting_for_bot[(username, chatid)] = False
 
     return jsonify({"reply": bot_reply})
-
-
 
 
 # -----------------------

@@ -55,7 +55,7 @@ const fetchMessages = async (questionId) => {
 };
 
   // Mesaj gönder
-  const sendMessage = async (questionId) => {
+const sendMessage = async (questionId) => {
   if (!newMessage[questionId]?.trim()) return;
   try {
     await axios.post(

@@ -3,7 +3,7 @@ import axios from "axios";
 import Message from "./Message";
 import { FaFileCirclePlus } from "react-icons/fa6";
 
-export default function ChatBox({ token, selectedChat }) {
+export default function ChatBox({ token, selectedChat, onAnyMessageSent }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,6 +63,7 @@ export default function ChatBox({ token, selectedChat }) {
       const botReply = res.data?.reply || "⚠️ Yanıt alınamadı.";
       const botMsg = { sender: "bot", text: botReply };
       setMessages(prev => [...prev, botMsg]);
+      if (onAnyMessageSent) onAnyMessageSent();
     } catch (err) {
       console.error("Mesaj gönderme hatası:", err.response?.data || err.message);
       setMessages(prev => [
@@ -110,6 +111,7 @@ export default function ChatBox({ token, selectedChat }) {
 
       const botMsg = { sender: "bot", text: res.data.reply };
       setMessages(prev => [...prev, botMsg]);
+      if (onAnyMessageSent) onAnyMessageSent();
     } catch (err) {
       console.error("PDF yükleme hatası:", err.response?.data || err.message);
       setMessages(prev => [...prev, { sender: "bot", text: "⚠️ PDF analiz edilemedi." }]);

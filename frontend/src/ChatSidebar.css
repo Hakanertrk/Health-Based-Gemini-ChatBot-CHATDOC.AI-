@@ -1,12 +1,14 @@
 /* Sidebar genel ayarlar */
 .chat-sidebar {
   position: fixed;
-  top: var(--header-height, 70px); /* Header yüksekliği kadar aşağıdan başla */
-  bottom: var(--footer-height, 30px); /* Footer üstüne kadar uzansın */
+  top: var(--header-height, 100px); /* Header yüksekliği kadar aşağıdan başla */
+  bottom: var(--footer-height, 70px); /* Footer üstüne kadar uzansın */
   left: 0;
-  width: 250px;
-  background-color: #1e1e2f !important;
-  color: #fff !important;
+  border-bottom-right-radius: 15px;
+  border-top-right-radius: 15px;
+  width: 30vh;
+  background-color: #efefef !important;
+  color: #484848 !important;
   display: flex;
   flex-direction: column;
   padding: 1rem;
@@ -19,20 +21,37 @@
 
 /* Yeni sohbet butonu */
 .new-chat-btn {
-  background-color: #4f46e5;
-  color: #fff;
+  
+  background-color: #cbcbcb;
+  color: #4f4f4f;
   border: none;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  /* ikon ve yazıyı dikey ortalar */
+  /* ortalı durmasını sağlar */
+  gap: 8px;  
   transition: background-color 0.2s;
 }
 
-.new-chat-btn:hover {
-  background-color: #6366f1;
+.new-chat-btn:hover{
+  background-color: #c55ef0;
+  color: white
+  
+ 
 }
+
+.new-chat-btn .icon {
+  stroke-width: 2;
+  flex-shrink: 0; /* ikon küçülmesin */
+  gap: 5px;
+  margin-right: 5px;
+  align-items: center;
+}
+
+
 
 /* Chat listesi */
 .chat-list {
@@ -51,7 +70,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #e5e7eb;
+  color: #777777;
 }
 
 .chat-item:hover {
@@ -59,9 +78,9 @@
 }
 
 .chat-item.active {
-  background-color: #4f46e5;
+  
   font-weight: bold;
-  color: #ffffff;
+  color: #212121;
 }
 
 /* Scrollbar düzeni */

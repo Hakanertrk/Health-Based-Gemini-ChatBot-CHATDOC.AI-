@@ -24,7 +24,7 @@ export default function Register() {
     setSuccess("");
 
     if (!firstname || !lastname || !username || !password) {
-      setError("Tüm alanlar zorunludur");
+      setError("*Tüm alanlar zorunludur*");
       return;
     }
 

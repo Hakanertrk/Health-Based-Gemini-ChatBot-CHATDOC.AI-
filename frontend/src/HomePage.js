@@ -59,7 +59,7 @@ export default function HomePage({ token }) {
       <section id= "home" className="hp-hero">
         <h1>Sağlığınızı Yapay Zeka ile Yönetin</h1>
         <p>Her zaman, her yerden sorularınızı sorabilir ve anında cevap alabilirsiniz.</p>
-        <button onClick={handleStart} className="hp-cta">Başla</button>
+        <button onClick={handleStart} className="hp-cta">Hemen Başla</button>
       </section>
 
       {/* Özellikler */}

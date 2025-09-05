@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaArrowLeft } from "react-icons/fa";
+import { LiaAngleLeftSolid } from "react-icons/lia";
+
 
 export default function Login({ setToken }) {
   const [username, setUsername] = useState("");
@@ -82,7 +83,7 @@ const handleLogin = async (e) => {
               onClick={() => navigate("/home")} 
               style={{ display: "flex", alignItems: "center", gap: "5px" }}
             >
-              <FaArrowLeft /> Ana Sayfaya Dön
+              <LiaAngleLeftSolid className="auth-container-icon" /> Ana Sayfaya Dön
             </button>
           </div>
       </form>

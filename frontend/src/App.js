@@ -17,6 +17,7 @@ import { FaTrash } from "react-icons/fa";
 
 function ChatPage({ token }) {
   const [selectedChat, setSelectedChat] = useState(null);
+  const [chatListVersion, setChatListVersion] = useState(0);
   const [appointments, setAppointments] = useState([]);
   const [newAppt, setNewAppt] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -108,6 +109,7 @@ function ChatPage({ token }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSelectedChat(res.data.chatId);
+      setChatListVersion(v => v + 1);
     } catch (err) {
       console.error("Yeni chat oluşturma hatası:", err.response?.data || err.message);
     }
@@ -120,8 +122,9 @@ function ChatPage({ token }) {
         selectedChat={selectedChat}
         onSelectChat={setSelectedChat}
         onNewChat={createNewChat}
+        version={chatListVersion}
       />
-      <ChatBox token={token} selectedChat={selectedChat} />
+      <ChatBox token={token} selectedChat={selectedChat} onAnyMessageSent={() => setChatListVersion(v => v + 1)} />
 
       <div className="appointment-panel">
         <h3>📅 Randevular</h3>

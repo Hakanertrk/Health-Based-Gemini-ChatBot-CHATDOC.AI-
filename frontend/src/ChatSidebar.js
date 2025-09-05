@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./ChatSidebar.css";
+import { FileEdit } from "lucide-react";
 
-export default function ChatSidebar({ token, selectedChat, onSelectChat, onNewChat }) {
+
+export default function ChatSidebar({ token, selectedChat, onSelectChat, onNewChat, version }) {
   const [chats, setChats] = useState([]);
 
   // Chatleri backend'den çek (/chats)
@@ -29,11 +31,14 @@ export default function ChatSidebar({ token, selectedChat, onSelectChat, onNewCh
     };
 
     fetchChats();
-  }, [token, selectedChat, onSelectChat]);
+  }, [token, selectedChat, onSelectChat, version]);
 
   return (
     <div className="chat-sidebar">
-      <button className="new-chat-btn" onClick={onNewChat}>＋ Yeni Sohbet</button>
+      <button className="new-chat-btn" onClick={onNewChat}>
+        <FileEdit size={18} className="icon" />
+         Yeni Sohbet
+      </button>
       <ul className="chat-list">
         {chats.map(chat => (
           <li
