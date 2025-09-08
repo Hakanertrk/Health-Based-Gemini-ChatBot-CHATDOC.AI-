@@ -139,7 +139,7 @@ function ChatPage({ token }) {
                 className="appt-delete-icon"
                 onClick={() => deleteAppointment(a.id)}
                 title="Randevuyu Sil"
-                style={{ cursor: "pointer", color: "#ff4d4f", fontSize: "1.2rem" }}
+                
               />
             </li>
           ))}

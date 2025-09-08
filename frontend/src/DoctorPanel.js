@@ -116,6 +116,25 @@ useEffect(() => {
                   fetchMessages(q.id);
                 }}
               >
+                {q.status.toLowerCase() !== "closed" && (
+                  <div className="card-closed">
+                    <button
+                      className="card-closed-button"
+                      onClick={(e) => {
+                        e.stopPropagation(); // kartın onClick'ini tetiklemesin
+                        axios.post(
+                          `http://127.0.0.1:5000/doctor-questions/${q.id}/close`,
+                          {},
+                          { headers: { Authorization: `Bearer ${token}` } }
+                        )
+                        .then(() => fetchQuestions())
+                        .catch(err => console.error("Close error:", err));
+                      }}
+                    >
+                      Kapat
+                    </button>                                 
+                  </div>
+                )}  
                 <div className="question-header">
                   <strong>{q.subject}</strong>
                   <span className={`status ${q.status.toLowerCase()}`}>{q.status}</span>

@@ -779,6 +779,32 @@ def add_message(question_id):
     conn.commit()
     return jsonify({"message": "Mesaj eklendi"}), 201
 
+
+# -----------------------
+# Doktor soruyu kapatma
+# -----------------------
+@app.route("/doctor-questions/<int:question_id>/close", methods=["POST"])
+def close_doctor_question(question_id):
+    payload, error_response, status = verify_token(request.headers.get("Authorization"))
+    if error_response:
+        return error_response, status
+
+    if payload.get("role") != "doctor":
+        return jsonify({"error": "Yetkisiz işlem"}), 403
+
+    cursor.execute(
+        "UPDATE doctor_questions SET status='closed' WHERE id=%s RETURNING id",
+        (question_id,)
+    )
+    updated = cursor.fetchone()
+    conn.commit()
+
+    if updated:
+        return jsonify({"message": "Soru kapatıldı", "question_id": question_id, "status": "closed"}), 200
+    else:
+        return jsonify({"error": "Soru bulunamadı"}), 404
+    
+    
 # -----------------------
 # Doktor paneli: tüm sorular
 # -----------------------
@@ -841,7 +867,7 @@ def get_my_questions():
             d.id AS doctor_id, d.firstname, d.lastname, d.specialization
         FROM doctor_questions q
         LEFT JOIN users d ON q.doctor_id = d.id
-        WHERE q.user_id = %s
+        WHERE q.user_id = %s AND q.user_deleted = FALSE
         ORDER BY q.created_at DESC
         """,
         (user_id,)
@@ -870,7 +896,6 @@ def get_my_questions():
 
 @app.route("/my-questions/<int:question_id>", methods=["DELETE"])
 def delete_my_question(question_id):
-    # Token kontrolü
     auth_header = request.headers.get("Authorization", "")
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"error": "Token eksik"}), 401
@@ -882,23 +907,22 @@ def delete_my_question(question_id):
     except:
         return jsonify({"error": "Geçersiz token"}), 401
 
-    # Kullanıcı ID'sini al
     cursor.execute("SELECT id FROM users WHERE username=%s", (username,))
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Kullanıcı bulunamadı"}), 404
     user_id = row[0]
 
-    # Soruya ait user kontrolü ve silme
+    # Hard delete yerine soft delete
     cursor.execute(
-        "DELETE FROM doctor_questions WHERE id=%s AND user_id=%s RETURNING id",
+        "UPDATE doctor_questions SET user_deleted = TRUE WHERE id=%s AND user_id=%s RETURNING id",
         (question_id, user_id)
     )
-    deleted = cursor.fetchone()
+    updated = cursor.fetchone()
     conn.commit()
 
-    if deleted:
-        return jsonify({"message": "Soru silindi"})
+    if updated:
+        return jsonify({"message": "Soru kullanıcı panelinden kaldırıldı"})
     else:
         return jsonify({"error": "Soru bulunamadı veya yetkisiz"}), 404
 
