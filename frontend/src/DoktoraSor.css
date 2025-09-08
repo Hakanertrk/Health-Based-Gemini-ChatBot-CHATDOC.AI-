@@ -5,13 +5,24 @@
   font-family: Arial, sans-serif;
 }
 
-.new-question input,
+
+.new-question input{
+
+  font-size: 12px;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 .new-question textarea {
     font-size: 12px;
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  border-radius: 8px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
   border: 1px solid #ccc;
   box-sizing: border-box;
 }
@@ -24,6 +35,34 @@
   color: white;
   cursor: pointer;
 }
+.attach-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f7f7f7;
+  border-top: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  padding: 6px 10px;
+  border-radius: 6px 6px 0 0;
+}
+
+.attach-icon {
+  font-size: 20px;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.attach-icon:hover {
+  color: #007bff;
+}
+
+.file-name {
+  font-size: 13px;
+  color: #333;
+}
+
 
 .question-list {
   margin: 20px 0;
@@ -101,7 +140,8 @@
 .message-input {
   display: flex;
   padding: 10px;
-  
+  align-items: center;
+  gap: 8px;
   background-color: #f9f9f9;
 }
 
@@ -115,12 +155,13 @@
 }
 
 .message-input button {
-  padding: 0 20px;
+  padding: 14px 20px;
   border: none;
   border-radius: 20px;
   background-color: #ba48d9;
   color: white;
   cursor: pointer;
+  
 }
 
 /* Scrollbar stilini güzelleştirmek için */
@@ -134,23 +175,7 @@
 }
 
 
-/* Mesajlarda ekli dosyalar */
-.attachments {
-  margin-top: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
 
-.attachments a {
-  color: #6a1b9a;
-  text-decoration: none;
-  font-size: 13px;
-}
-
-.attachments a:hover {
-  text-decoration: underline;
-}
 .new-question select {
   width: 100%;
   padding: 10px;

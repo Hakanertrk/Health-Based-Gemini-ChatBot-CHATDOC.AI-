@@ -90,6 +90,21 @@
   }
 }
 
+
+.file-download a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #007bff;
+  font-size: 14px;
+}
+
+.file-download a:hover {
+  text-decoration: underline;
+}
+
+
+
 .question-list {
   display: flex;
   flex-direction: column;
@@ -231,7 +246,7 @@
 }
 
 
-.message-input {
+.panel-message-input {
   display: flex;
   padding: 10px;
   background: #f9f9f9;
@@ -240,7 +255,7 @@
   z-index: 1;
 }
 
-.message-input textarea {
+.panel-message-input textarea {
   flex: 1;
   resize: none;
   padding: 8px;
@@ -249,7 +264,7 @@
   margin-right: 10px;
 }
 
-.message-input button {
+.panel-message-input button {
   padding: 4px 16px;
   border: none;
   background-color: #a749ee;
@@ -257,7 +272,35 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.panel-attach-icon {
+  margin: 0 8px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.file-name-bar {
+  background: #f1f1f1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #333;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
-.message-input button:hover {
+.selected-file {
+  margin-left: 8px;
+  font-size: 0.85rem;
+  color: #555;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-message-input button:hover {
   background-color: #741d80;
 }

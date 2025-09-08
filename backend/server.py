@@ -16,7 +16,7 @@ import re
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 JWT_SECRET = os.getenv("JWT_SECRET")
-ALLOWED_EXTENSIONS = {'pdf'}
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'}
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -675,14 +675,26 @@ def doctor_questions():
                 return jsonify({"error": "Kullanıcı bulunamadı"}), 404
             user_id = row[0]
 
-        data = request.json
-        subject = data.get("subject")
-        message = data.get("message")
-        doctor_id = data.get("doctor_id")  
+        if request.content_type.startswith("multipart/form-data"):
+            subject = request.form.get("subject")
+            message = request.form.get("message")
+            doctor_id = request.form.get("doctor_id")
+            file = request.files.get("file")
+        else:
+            data = request.json
+            subject = data.get("subject")
+            message = data.get("message")
+            doctor_id = data.get("doctor_id")
+            file = None
 
-        if not subject or not message or not doctor_id:
-            return jsonify({"error": "Başlık, mesaj ve doktor seçimi zorunludur"}), 400
+        file_url = None
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            file_url = f"http://127.0.0.1:5000/uploads/{filename}"
 
+        # question insert
         cursor.execute(
             """
             INSERT INTO doctor_questions (user_id, doctor_id, subject, status, created_at)
@@ -693,10 +705,12 @@ def doctor_questions():
         )
         question_id = cursor.fetchone()[0]
 
+        # first message insert
         cursor.execute(
-            "INSERT INTO doctor_messages (question_id, sender, message, created_at) VALUES (%s, %s, %s, NOW())",
-            (question_id, "user", message)
+            "INSERT INTO doctor_messages (question_id, sender, message, file_url, created_at) VALUES (%s, %s, %s, %s, NOW())",
+            (question_id, "user", message, file_url)
         )
+
         conn.commit()
         return jsonify({"message": "Soru oluşturuldu", "question_id": question_id}), 201
 
@@ -754,30 +768,30 @@ def add_message(question_id):
     if error_response:
         return error_response, status
 
-    user_id = payload.get("user_id")
     role = payload.get("role", "user")
-
-    data = request.json
-    message = data.get("message")
-    if not message:
-        return jsonify({"error": "Mesaj boş olamaz"}), 400
-
     sender = "doctor" if role == "doctor" else "user"
 
+    message = request.form.get("message", "")
+    file = request.files.get("file")
+    file_url = None
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        file_url = f"http://127.0.0.1:5000/uploads/{filename}"
+
     cursor.execute(
-        "INSERT INTO doctor_messages (question_id, sender, message, created_at) VALUES (%s, %s, %s, NOW())",
-        (question_id, sender, message)
+        "INSERT INTO doctor_messages (question_id, sender, message, file_url, created_at) VALUES (%s, %s, %s, %s, NOW())",
+        (question_id, sender, message, file_url)
     )
 
-    # status güncelleme
     status_update = "answered" if sender == "doctor" else "pending"
-    cursor.execute(
-        "UPDATE doctor_questions SET status=%s WHERE id=%s",
-        (status_update, question_id)
-    )
+    cursor.execute("UPDATE doctor_questions SET status=%s WHERE id=%s", (status_update, question_id))
 
     conn.commit()
-    return jsonify({"message": "Mesaj eklendi"}), 201
+    return jsonify({"message": "Mesaj eklendi", "file_url": file_url}), 201
+
 
 
 # -----------------------
@@ -823,7 +837,7 @@ def get_messages(question_id):
 
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, sender, message, created_at FROM doctor_messages WHERE question_id=%s ORDER BY created_at ASC",
+        "SELECT id, sender, message, file_url, created_at FROM doctor_messages WHERE question_id=%s ORDER BY created_at ASC",
         (question_id,)
     )
     messages = cursor.fetchall()
@@ -833,7 +847,8 @@ def get_messages(question_id):
             "id": m[0],
             "sender": m[1],
             "message": m[2],
-            "created_at": m[3].isoformat()
+            "file_url": m[3],
+            "created_at": m[4].isoformat()
         }
         for m in messages
     ]
