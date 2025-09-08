@@ -136,6 +136,28 @@
   color: #555;
   margin-top: 5px;
 }
+.file-name-bar {
+  background: #f1f1f1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.remove-file {
+  cursor: pointer;
+  margin-left: 8px;
+  color: red;
+}
+
 
 .message-input {
   display: flex;
@@ -229,4 +251,74 @@
 
 .question-item svg:hover {
   color: #707070;
+}
+
+/* ------------ Responsive (tablet) ------------ */
+@media (max-width: 992px) {
+  .doktor-sor-container {
+    max-width: 100%;
+    margin: 20px auto;
+    padding: 12px;
+  }
+  .chat-box {
+    height: 65vh;
+  }
+  .message {
+    max-width: 85%;
+  }
+}
+
+/* ------------ Responsive (mobile) ------------ */
+@media (max-width: 400px) {
+  .doktor-sor-container {
+    width: 100%;
+    margin: 10px auto;
+    padding: 10px;
+  }
+  .new-question button {
+    width: 100%;
+  }
+  .chat-box h4 {
+    font-size: 14px;
+    padding: 8px;
+  }
+  .chat-box {
+    height: 60vh;
+  }
+  .messages {
+    padding: 8px;
+    gap: 8px;
+  }
+  .message {
+    max-width: 90%;
+    padding: 8px 12px;
+    border-radius: 14px;
+  }
+  .message small {
+    font-size: 9px;
+  }
+  .message-input {
+    padding: 8px;
+    gap: 6px;
+  }
+  .message-input textarea {
+    margin-right: 6px;
+    padding: 8px;
+  }
+  .message-input button {
+    padding: 10px 14px;
+  }
+  .question-item {
+    padding: 8px;
+  }
+  .attach-bar {
+    padding: 6px 8px;
+  }
+  .attach-icon {
+    font-size: 18px;
+  }
+  .file-name,
+  .file-name-bar {
+    font-size: 12px;
+  }
 }

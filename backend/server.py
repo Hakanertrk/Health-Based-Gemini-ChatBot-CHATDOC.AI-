@@ -548,6 +548,7 @@ def chat(chatid):
     6) Kısa, uygulanabilir evde bakım önerileri ver (maksimum 4 madde). Gerektiğinde doktor yönlendirmesi veya test tavsiyesi ekle.
     7) Sonunda 1 adet açık takip sorusu sor (örn. “Bu şikayet ne zamandır var?” veya “Ağrı nerede, ne sıklıkla?”).
     8) Yanıt 150-220 kelime arasında, net ve anlaşılır olsun. Tıbbi terimler varsa kısa açıklama ekle.
+    9) Yanıtlarında uygun bulduğunda yanıt sonlarına kullanıcıyı Doktor'a Sor bölümüne yönlendircek kısa mesajlar ekle.
 
     Çıktı sadece düz metin olmalı; kod, JSON veya uzun literatür alıntısı ekleme.
     """

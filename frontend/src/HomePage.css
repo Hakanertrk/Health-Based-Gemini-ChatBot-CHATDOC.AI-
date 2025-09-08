@@ -188,10 +188,11 @@
   padding: 30px;
   border-radius: 12px;
   width: 250px;
+  transition: all 0.3s ease;
  
 }
 .feature-card:hover{
-  transition: all 0.3s;
+ 
   transform: scale(1.05);
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 

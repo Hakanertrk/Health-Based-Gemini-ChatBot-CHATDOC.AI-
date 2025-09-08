@@ -92,11 +92,12 @@
 
 
 .file-download a {
-  display: inline-flex;
+  
   align-items: center;
   text-decoration: none;
   color: #007bff;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .file-download a:hover {
@@ -217,6 +218,13 @@
   display: flex;
   flex-direction: column;
 }
+@media (max-width: 600px){
+  .messages-wrapper{
+    max-height: 70vh;
+    overflow-y: scroll;
+  }
+  
+}
 
 
 .message {
@@ -278,7 +286,7 @@
   align-items: center;
   cursor: pointer;
 }
-.file-name-bar {
+.panel-file-name-bar {
   background: #f1f1f1;
   padding: 4px 8px;
   border-radius: 4px;
@@ -303,4 +311,56 @@
 
 .panel-message-input button:hover {
   background-color: #741d80;
+}
+
+/* ------------ Responsive (tablet) ------------ */
+@media (max-width: 480px) {
+  .panel-sidebar {
+    height: 100%;
+    width: 220px;
+    max-height: 100vh;
+    overflow-y: scroll;
+  }
+  .status {
+    font-size: 0.75rem;
+  }
+}
+
+/* ------------ Responsive (mobile) ------------ */
+@media (max-width: 600px) {
+  .panel-body {
+    flex-direction: column;
+    height: auto;
+  }
+  .sidebar {
+    max-height: 400px;
+    overflow-y: scroll;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+  .content {
+    height: calc(100vh - 160px);
+  }
+  .chat-container-panel {
+    margin: 8px 0;
+    height: 100%;
+  }
+  
+  .message {
+    max-width: 90%;
+    padding: 8px 12px;
+  }
+  .panel-message-input {
+    padding: 8px;
+    gap: 6px;
+  }
+  .panel-message-input textarea {
+    margin-right: 6px;
+    padding: 8px;
+  }
+  .panel-message-input button {
+    padding: 6px 12px;
+  }
 }

@@ -13,7 +13,10 @@ export default function Header({ token, logout }) {
   return (
   <header className="app-header">
     <div className="logo">
-      <img src="/logo.png" alt="ChatDoc Logo" />
+      <a href="/home">
+        <img src="/logo.png" alt="ChatDoc Logo" />
+      </a>
+
     </div>
     <div className="menu">
 

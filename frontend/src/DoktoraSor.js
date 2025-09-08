@@ -306,11 +306,24 @@ const scrollToBottom = () => {
                 rows="2"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); 
-                    sendMessage();      
+                    e.preventDefault();
+                    sendMessage();
                   }
                 }}
               />
+
+              {/* Seçilen dosya adı göster */}
+              {fileForMessage && (
+                <div className="file-name-bar">
+                  {fileForMessage.name}{" "}
+                  <span
+                    className="remove-file"
+                    onClick={() => setFileForMessage(null)}
+                  >
+                    ✖
+                  </span>
+                </div>
+              )}
 
               {/* Attach ikonu */}
               <FaPaperclip
@@ -327,6 +340,7 @@ const scrollToBottom = () => {
 
               <button onClick={sendMessage}>Gönder</button>
           </div>
+
         </div>
       )}
     </div>

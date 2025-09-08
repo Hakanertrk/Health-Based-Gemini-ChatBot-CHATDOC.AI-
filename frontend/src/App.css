@@ -158,7 +158,7 @@ body {
 }
 
 .auth-form input:focus {
-  border-color: #b666f3;
+  border-color: #8d3fd1;
   box-shadow: 0 0 8px rgba(164, 70, 236, 0.4);
 }
 
@@ -167,7 +167,7 @@ body {
   width: 100%;
   padding: 12px;
   border-radius: 8px;
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -175,7 +175,7 @@ body {
 }
 
 .auth-form button:hover {
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   transform: scale(1.03);
 }
 
@@ -192,7 +192,7 @@ body {
   width: 200px;
   padding: 10px;
   border-radius: 8px;
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   color: #fff;
   font-weight: bold;
   cursor: pointer;
@@ -200,7 +200,7 @@ body {
 }
 
 .form-toggle-wrapper button:hover {
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   transform: scale(1.05);
 }
 /* -------------------- Appoitments area -------------------- */
@@ -346,9 +346,15 @@ input.appt-input[type="datetime-local"] {
 
 
 @media (max-width: 768px) {
+  .app-container{
+    align-items: right;
+    justify-content: right;
+  }
+
   .appointment-panel {
+
     position: static;
-    width: 100%;
+    width:50%;
     margin-bottom: 20px;
   }
 
@@ -373,6 +379,7 @@ input.appt-input[type="datetime-local"] {
   overflow: hidden; /* Container taşmasını engelle */
 }
 
+
 .chat-area {
   flex: 1;
   overflow-y: auto; /* Scroll ekle */
@@ -388,7 +395,7 @@ input.appt-input[type="datetime-local"] {
   border-radius: 8px;
 }
 .chat-area::-webkit-scrollbar-thumb {
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   border-radius: 8px;
   border: 2px solid #f0f0f0;
 }
@@ -431,7 +438,7 @@ input {
 }
 
 input:focus {
-  border-color: #b666f3;
+  border-color: #8d3fd1;
   box-shadow: 0 0 5px rgba(195, 69, 233, 0.5);
 }
 
@@ -491,7 +498,7 @@ input::placeholder {
 }
 
 .message.user {
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   color: #fff;
   align-self: flex-start;
   text-align: left;
@@ -552,7 +559,7 @@ input::placeholder {
   padding: 6px 12px;
   border: none;
   border-radius: 6px;
-  background-color: #b666f3;
+  background-color: #8d3fd1;
   color: white;
   cursor: pointer;
   font-size: 14px;
@@ -621,7 +628,7 @@ input::placeholder {
   height: 120px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #b666f3;
+  border: 4px solid #8d3fd1;
   position: relative;
   cursor: pointer;
 }
@@ -673,7 +680,7 @@ input::placeholder {
   height: 120px;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #b666f3;
+  border: 4px solid #8d3fd1;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
@@ -754,6 +761,30 @@ input::placeholder {
   font-weight: bold;
   margin-top: 10px;
   color: #007bff;
+}
+
+/* ------------ Responsive (tablet) ------------ */
+@media (max-width: 768px) {
+  .app-title { font-size: 1.8rem; }
+  .app-subtitle { font-size: 15px; }
+  .chat-container { gap: 12px; }
+  .chatbox { 
+    margin-left: 10px;
+    max-width: 50%; 
+  }
+}
+
+/* ------------ Responsive (mobile) ------------ */
+@media (max-width: 600px) {
+  .app-header { padding: 8px 12px; }
+  .app-header .logo img { width: 120px; }
+  .app-header .menu button { margin-right: 6px; padding: 6px 10px; }
+  .app-title { font-size: 1.5rem; }
+  .app-subtitle { font-size: 13px; }
+  .chat-container { flex-direction: column; height: auto; }
+  .chatbox { max-height: 68vh; padding: 12px; }
+  .input-area { flex-wrap: wrap; }
+  .profile-container { padding: 16px; margin: 20px auto; }
 }
 
 /*-------------------- PDF Dropzone -------------------- */

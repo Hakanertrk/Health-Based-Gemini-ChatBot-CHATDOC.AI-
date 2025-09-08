@@ -210,7 +210,7 @@ export default function DoctorPanel({ token }) {
 
                   {/* Dosya adı input barında göster */}
                   {fileToSend[activeQuestionId] && (
-                    <div className="file-name-bar">
+                    <div className="panel-file-name-bar">
                       {fileToSend[activeQuestionId].name}
                     </div>
                   )}
