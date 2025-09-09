@@ -29,3 +29,5 @@ backend/venv/
 .venv/
 __pycache__/
 README.md
+backend/uploads
+uploads

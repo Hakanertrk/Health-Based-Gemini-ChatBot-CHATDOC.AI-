@@ -505,9 +505,9 @@ def chat(chatid):
                 height_m = float(height) / 100
                 bmi = float(weight) / (height_m ** 2)
                 if bmi >= 32.5:
-                    extra_info += "Kullanıcının obezite durumu var. "    
+                    extra_info += "Kullanıcının fazla kilo durumu var. "    
                 elif bmi >= 25:
-                    extra_info += "Kullanıcı fazla kilolu. "
+                    extra_info += "Kullanıcı biraz kilolu. "
                 elif bmi < 18.5:
                     extra_info += "Kullanıcı zayıf. "
             except:

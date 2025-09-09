@@ -106,9 +106,9 @@ export default function DoctorPanel({ token }) {
     <div className="doctor-panel">
       <DoctorHeader />
       <div className="panel-body">
-        {/* Sidebar */}
-        <div className="sidebar">
-          <div className="sidebar-header">
+        {/* panel-sidebar */}
+        <div className="panel-sidebar">
+          <div className="panel-sidebar-header">
             <h2>
               Merhabalar, Dr. {localStorage.getItem("firstname")} {localStorage.getItem("lastname")}
             </h2>

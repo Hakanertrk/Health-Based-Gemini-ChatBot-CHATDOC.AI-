@@ -25,6 +25,10 @@ body {
   width: 160px; /* istediğin boyut */
   height: auto;
 }
+.doctor-sor-button{
+  color:white;
+  background-color: #8d3fd1 ;
+}
 
 .app-header {
   display: flex;
@@ -449,7 +453,7 @@ input::placeholder {
 
 .app-header button {
   
-  color: #a749ee;
+  
   border: none;
   border-radius: 25px;
   padding: 5px 20px;

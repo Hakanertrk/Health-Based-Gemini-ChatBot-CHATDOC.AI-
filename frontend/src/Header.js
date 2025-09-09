@@ -19,9 +19,9 @@ export default function Header({ token, logout }) {
 
     </div>
     <div className="menu">
-
+      
        {!isDoctorQuestionPage && (
-        <button onClick={() => navigate("/doktora-sor")}>Doktor'a Sor</button>
+        <button className="doctor-sor-button" onClick={() => navigate("/doktora-sor")}>Doktor'a Sor</button>
       )}
       <button onClick={() => navigate(isChatPage ? "/profile" : "/chat")}>
         {isChatPage ? "Profil" : "Chat"}
